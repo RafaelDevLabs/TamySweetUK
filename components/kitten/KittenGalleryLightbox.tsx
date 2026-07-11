@@ -84,7 +84,7 @@ export default function KittenGalleryLightbox({
           onClose();
         }}
         aria-label="Close image gallery"
-        className="absolute right-3 top-3 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/14 text-white backdrop-blur transition hover:bg-white/22 sm:right-6 sm:top-6 sm:h-12 sm:w-12"
+        className="absolute right-3 top-3 z-[30] inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/14 text-white backdrop-blur transition hover:bg-white/22 sm:right-6 sm:top-6 sm:h-12 sm:w-12"
       >
         <CloseIcon className="h-5 w-5" />
       </button>
@@ -98,7 +98,7 @@ export default function KittenGalleryLightbox({
             onPrevious();
           }}
           aria-label="Previous image"
-          className="absolute left-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/14 text-white backdrop-blur transition hover:bg-white/22 sm:left-6 sm:h-12 sm:w-12"
+          className="absolute left-3 top-1/2 z-[30] inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/14 text-white backdrop-blur transition hover:bg-white/22 sm:left-6 sm:h-12 sm:w-12"
         >
           <ChevronLeftIcon className="h-5 w-5" />
         </button>
@@ -113,28 +113,28 @@ export default function KittenGalleryLightbox({
             onNext();
           }}
           aria-label="Next image"
-          className="absolute right-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/14 text-white backdrop-blur transition hover:bg-white/22 sm:right-6 sm:h-12 sm:w-12"
+          className="absolute right-3 top-1/2 z-[30] inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/14 text-white backdrop-blur transition hover:bg-white/22 sm:right-6 sm:h-12 sm:w-12"
         >
           <ChevronRightIcon className="h-5 w-5" />
         </button>
       ) : null}
 
       <div
-        className="relative flex h-full w-full max-h-[90vh] max-w-[94vw] items-center justify-center"
+        className="relative z-[10] flex h-full w-full max-h-[90vh] max-w-[94vw] items-center justify-center"
         onClick={(event) => event.stopPropagation()}
       >
         <Image
           src={selectedImage}
           alt={`${name} fullscreen image ${selectedIndex + 1}`}
           fill
-          quality={90}
-          className="object-contain"
+          quality={85}
+          className="pointer-events-none object-contain"
           sizes="94vw"
           priority
         />
       </div>
 
-      <div className="absolute bottom-3 right-3 rounded-full bg-white/14 px-3 py-1.5 text-xs font-semibold tracking-[0.16em] text-white backdrop-blur sm:bottom-6 sm:right-6">
+      <div className="absolute bottom-3 right-3 z-[30] rounded-full bg-white/14 px-3 py-1.5 text-xs font-semibold tracking-[0.16em] text-white backdrop-blur sm:bottom-6 sm:right-6">
         {selectedIndex + 1} / {images.length}
       </div>
     </div>

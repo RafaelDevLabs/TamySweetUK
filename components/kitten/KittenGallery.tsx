@@ -51,42 +51,29 @@ export default function KittenGallery({ images, name, availability }: KittenGall
   }
 
   return (
-    <div className="mb-8">
+    <div className="mx-auto mb-8 w-full max-w-[780px]">
       <div className="relative w-full overflow-hidden rounded-[28px] bg-white shadow-[0_24px_60px_rgba(182,143,141,0.16)]">
-        <div className="relative aspect-[4/5] max-h-[70vh] w-full overflow-hidden rounded-[28px] bg-[#F8F3F1] md:aspect-[16/10] md:max-h-[620px]">
-          <div className="pointer-events-none absolute inset-0">
-            <Image
-              src={selectedImage}
-              alt=""
-              fill
-              aria-hidden="true"
-              quality={90}
-              className="scale-[1.08] object-cover object-center blur-[28px]"
-              sizes="(max-width: 768px) 100vw, 900px"
-              style={{ opacity: 0.16 }}
-            />
-          </div>
-
+        <div className="relative aspect-[4/5] max-h-[82vh] w-full overflow-hidden rounded-[28px] bg-[#F8F3F1] md:max-h-[760px]">
           <button
             ref={mainImageButtonRef}
             type="button"
             onClick={handleOpenLightbox}
             onDoubleClick={handleOpenLightbox}
             aria-label={`Open fullscreen gallery for ${name}`}
-            className="relative z-[1] block h-full w-full cursor-zoom-in bg-transparent"
+            className="relative z-[1] block h-full w-full cursor-zoom-in bg-transparent p-0"
           >
             <Image
               src={selectedImage}
               alt={name}
               fill
-              quality={90}
+              quality={85}
               priority={safeIndex === 0}
-              className="object-contain object-center"
-              sizes="(max-width: 768px) 100vw, 900px"
+              className="object-cover object-center"
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 78vw, 780px"
             />
           </button>
 
-          <div className="absolute left-4 top-4">
+          <div className="absolute left-4 top-4 z-[30]">
             <AvailabilityBadge availability={availability} />
           </div>
 
@@ -149,7 +136,7 @@ export default function KittenGallery({ images, name, availability }: KittenGall
                 src={image}
                 alt={`${name} photo ${index + 1}`}
                 fill
-                quality={90}
+                quality={75}
                 className="object-cover"
                 sizes="92px"
               />

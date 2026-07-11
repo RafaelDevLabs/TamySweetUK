@@ -52,7 +52,6 @@ export async function updateKitten(
   const healthStatus = String(formData.get("health_status") ?? "").trim();
   const shortDescription = String(formData.get("short_description") ?? "").trim();
   const priceValue = String(formData.get("price") ?? "").trim();
-  const sortOrderValue = String(formData.get("sort_order") ?? "").trim();
   const dateOfBirth = getOptionalString(formData, "date_of_birth");
   const temperament = getOptionalString(formData, "temperament");
   const description = getOptionalString(formData, "description");
@@ -80,11 +79,6 @@ export async function updateKitten(
   const price = Number(priceValue);
   if (!Number.isFinite(price) || price < 0) {
     return { error: "Price must be a valid number greater than or equal to 0." };
-  }
-
-  const sortOrder = sortOrderValue ? Number(sortOrderValue) : 0;
-  if (!Number.isFinite(sortOrder) || sortOrder < 0) {
-    return { error: "Sort order must be a valid number greater than or equal to 0." };
   }
 
   const newImageFiles = formData
@@ -166,7 +160,6 @@ export async function updateKitten(
         tica_registered: getCheckboxValue(formData, "tica_registered"),
         parents_can_be_seen: getCheckboxValue(formData, "parents_can_be_seen"),
         is_featured: getCheckboxValue(formData, "is_featured"),
-        sort_order: sortOrder,
       })
       .eq("id", kittenId);
 

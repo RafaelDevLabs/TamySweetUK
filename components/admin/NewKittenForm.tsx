@@ -59,7 +59,6 @@ type FormState = {
   availability: string;
   health_status: string;
   date_of_birth: string;
-  sort_order: string;
   short_description: string;
   temperament: string;
   description: string;
@@ -82,7 +81,6 @@ const initialFormState: FormState = {
   availability: "",
   health_status: "",
   date_of_birth: "",
-  sort_order: "",
   short_description: "",
   temperament: "",
   description: "",
@@ -94,6 +92,10 @@ const initialFormState: FormState = {
   parents_can_be_seen: false,
   is_featured: false,
 };
+
+const maxUploadDimension = 1800;
+const optimizedImageMimeType = "image/webp";
+const optimizedImageQuality = 0.82;
 
 function mapKittenToFormState(kitten?: Kitten): FormState {
   if (!kitten) {
@@ -110,7 +112,6 @@ function mapKittenToFormState(kitten?: Kitten): FormState {
     availability: kitten.availability,
     health_status: kitten.health_status,
     date_of_birth: kitten.date_of_birth ?? "",
-    sort_order: String(kitten.sort_order ?? 0),
     short_description: kitten.short_description,
     temperament: kitten.temperament ?? "",
     description: kitten.description ?? "",
@@ -166,6 +167,69 @@ function getMissingRequiredFields(formState: FormState) {
   return requiredFields.filter((field) => !String(formState[field]).trim());
 }
 
+function replaceFileExtension(fileName: string, extension: string) {
+  const normalizedName = fileName.replace(/\.[^.]+$/, "") || "kitten-image";
+  return `${normalizedName}.${extension}`;
+}
+
+function loadImageElement(file: File) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const imageUrl = URL.createObjectURL(file);
+    const image = new window.Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(imageUrl);
+      resolve(image);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(imageUrl);
+      reject(new Error(`We couldn't read ${file.name}.`));
+    };
+
+    image.src = imageUrl;
+  });
+}
+
+async function optimizeImageFile(file: File) {
+  if (typeof window === "undefined") {
+    return file;
+  }
+
+  const image = await loadImageElement(file);
+  const largestDimension = Math.max(image.naturalWidth, image.naturalHeight);
+  const scale = largestDimension > maxUploadDimension ? maxUploadDimension / largestDimension : 1;
+  const targetWidth = Math.max(1, Math.round(image.naturalWidth * scale));
+  const targetHeight = Math.max(1, Math.round(image.naturalHeight * scale));
+  const canvas = document.createElement("canvas");
+
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("We couldn't prepare the image for upload.");
+  }
+
+  context.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+  const optimizedBlob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob(resolve, optimizedImageMimeType, optimizedImageQuality);
+  });
+
+  if (!optimizedBlob) {
+    throw new Error(`We couldn't optimise ${file.name}.`);
+  }
+
+  const optimizedName = replaceFileExtension(file.name, "webp");
+  const optimizedFile = new File([optimizedBlob], optimizedName, {
+    type: optimizedImageMimeType,
+    lastModified: Date.now(),
+  });
+
+  return optimizedFile.size < file.size ? optimizedFile : file;
+}
+
 export default function NewKittenForm({
   mode = "create",
   initialKitten,
@@ -182,6 +246,7 @@ export default function NewKittenForm({
   const [clientError, setClientError] = useState<string | null>(null);
   const [serverState, setServerState] = useState<NewKittenFormState>(initialServerState);
   const [isPending, startTransition] = useTransition();
+  const [isProcessingImages, setIsProcessingImages] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -215,7 +280,7 @@ export default function NewKittenForm({
     }));
   }
 
-  function addFiles(fileList: FileList | null) {
+  async function addFiles(fileList: FileList | null) {
     if (!fileList) {
       return;
     }
@@ -225,17 +290,35 @@ export default function NewKittenForm({
       return;
     }
 
-    setImages((current) => {
-      const remainingSlots = Math.max(0, 8 - current.length);
-      const nextFiles = incomingFiles.slice(0, remainingSlots).map((file, index) => ({
-        kind: "new" as const,
-        tempId: `${Date.now()}-${index}-${file.name}`,
-        file,
-        url: URL.createObjectURL(file),
-      }));
+    const remainingSlots = Math.max(0, 8 - images.length);
+    const filesToAdd = incomingFiles.slice(0, remainingSlots);
 
-      return [...current, ...nextFiles];
-    });
+    if (filesToAdd.length === 0) {
+      setClientError("You can upload a maximum of 8 images per kitten.");
+      return;
+    }
+
+    setClientError(null);
+    setIsProcessingImages(true);
+
+    try {
+      const optimizedFiles = await Promise.all(filesToAdd.map((file) => optimizeImageFile(file)));
+
+      setImages((current) => [
+        ...current,
+        ...optimizedFiles.map((file, index) => ({
+          kind: "new" as const,
+          tempId: `${Date.now()}-${index}-${file.name}`,
+          file,
+          url: URL.createObjectURL(file),
+        })),
+      ]);
+    } catch (error) {
+      console.error("Failed to optimise kitten images before upload.", error);
+      setClientError("We couldn't prepare one of the images. Please try another photo.");
+    } finally {
+      setIsProcessingImages(false);
+    }
   }
 
   function removeImage(index: number) {
@@ -252,7 +335,7 @@ export default function NewKittenForm({
   }
 
   function handleFileInputChange(event: React.ChangeEvent<HTMLInputElement>) {
-    addFiles(event.target.files);
+    void addFiles(event.target.files);
     event.target.value = "";
   }
 
@@ -285,7 +368,6 @@ export default function NewKittenForm({
     data.set("availability", formState.availability);
     data.set("health_status", formState.health_status);
     data.set("date_of_birth", formState.date_of_birth);
-    data.set("sort_order", formState.sort_order);
     data.set("short_description", formState.short_description);
     data.set("temperament", formState.temperament);
     data.set("description", formState.description);
@@ -445,14 +527,6 @@ export default function NewKittenForm({
               value={formState.date_of_birth}
               onChange={(value) => updateField("date_of_birth", value)}
             />
-            <Field
-              label="Sort Order"
-              type="number"
-              min="0"
-              step="1"
-              value={formState.sort_order}
-              onChange={(value) => updateField("sort_order", value)}
-            />
           </div>
 
           <div className="mt-5 grid gap-5">
@@ -506,7 +580,7 @@ export default function NewKittenForm({
                 onDrop={(event) => {
                   event.preventDefault();
                   setDragActive(false);
-                  addFiles(event.dataTransfer.files);
+                  void addFiles(event.dataTransfer.files);
                 }}
                 className={`flex min-h-[280px] cursor-pointer flex-col items-center justify-center rounded-[30px] border-2 border-dashed px-6 py-10 text-center transition ${
                   dragActive
@@ -519,11 +593,11 @@ export default function NewKittenForm({
                 </span>
                 <p className="mt-5 font-serif text-[30px] text-[#2F2A2A]">Drop kitten photos here</p>
                 <p className="mt-3 max-w-[380px] text-[15px] leading-7 text-[#6F6666]">
-                  Upload 1 to 8 JPG, PNG or WEBP images. The first image becomes the primary cover
-                  photo for cards and listings.
+                  Upload 1 to 8 JPG, PNG or WEBP images. We automatically optimise them before
+                  upload so the gallery stays fast and smooth.
                 </p>
                 <span className="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-[#EF6F91] px-5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(239,111,145,0.2)]">
-                  Choose Files
+                  {isProcessingImages ? "Optimising Images..." : "Choose Files"}
                 </span>
               </label>
             </div>

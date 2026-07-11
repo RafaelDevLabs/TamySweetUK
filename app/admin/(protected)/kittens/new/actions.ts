@@ -83,7 +83,6 @@ export async function createKitten(
   const healthStatus = String(formData.get("health_status") ?? "").trim();
   const shortDescription = String(formData.get("short_description") ?? "").trim();
   const priceValue = String(formData.get("price") ?? "").trim();
-  const sortOrderValue = String(formData.get("sort_order") ?? "").trim();
   const dateOfBirth = getOptionalString(formData, "date_of_birth");
   const temperament = getOptionalString(formData, "temperament");
   const description = getOptionalString(formData, "description");
@@ -114,12 +113,6 @@ export async function createKitten(
     return { error: "Price must be a valid number greater than or equal to 0." };
   }
 
-  const sortOrder = sortOrderValue ? Number(sortOrderValue) : 0;
-
-  if (!Number.isFinite(sortOrder) || sortOrder < 0) {
-    return { error: "Sort order must be a valid number greater than or equal to 0." };
-  }
-
   const imageFiles = formData
     .getAll("images")
     .filter((file): file is File => file instanceof File && file.size > 0);
@@ -145,6 +138,20 @@ export async function createKitten(
   try {
     const supabase = createServerSupabaseClient(session.accessToken);
     const slug = await generateUniqueSlug(name, session.accessToken);
+    const { data: lastKitten, error: lastKittenError } = await supabase
+      .from("kittens")
+      .select("sort_order")
+      .order("sort_order", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (lastKittenError) {
+      console.error("Failed to determine the next kitten sort order.", lastKittenError);
+      return { error: "We couldn't prepare the kitten position in the list. Please try again." };
+    }
+
+    const sortOrder = (lastKitten?.sort_order ?? 0) + 1;
     const { data: insertedKitten, error: kittenError } = await supabase
       .from("kittens")
       .insert({
