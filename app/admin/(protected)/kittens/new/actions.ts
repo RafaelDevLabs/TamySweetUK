@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createServerSupabaseClient, requireAdminSession } from "@/lib/supabase/server";
@@ -219,5 +220,7 @@ export async function createKitten(
     return { error: "Something went wrong while creating the kitten. Please try again." };
   }
 
+  revalidatePath("/");
+  revalidatePath("/kittens");
   redirect("/admin/kittens");
 }

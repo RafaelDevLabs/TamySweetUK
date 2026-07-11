@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createServerSupabaseClient, requireAdminSession } from "@/lib/supabase/server";
@@ -35,6 +36,7 @@ export async function updateKitten(
   formData: FormData,
 ): Promise<EditKittenFormState> {
   const session = await requireAdminSession();
+  let currentKittenSlug = "";
   const kittenId = String(formData.get("kitten_id") ?? "").trim();
 
   if (!kittenId) {
@@ -135,6 +137,8 @@ export async function updateKitten(
       console.error("Failed to load the current kitten for update.", currentKittenError);
       return { error: "We couldn't load the kitten you want to update." };
     }
+
+    currentKittenSlug = currentKitten.slug;
 
     const currentImages = (currentKitten.images ?? []) as Array<
       Pick<KittenImage, "id" | "storage_path" | "sort_order">
@@ -266,5 +270,10 @@ export async function updateKitten(
     return { error: "Something went wrong while updating the kitten. Please try again." };
   }
 
+  revalidatePath("/");
+  revalidatePath("/kittens");
+  if (currentKittenSlug) {
+    revalidatePath(`/kittens/${currentKittenSlug}`);
+  }
   redirect("/admin/kittens");
 }

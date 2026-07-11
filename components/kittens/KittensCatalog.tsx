@@ -9,7 +9,6 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import { useSearchParams } from "next/navigation";
 
 import KittenCard from "@/components/KittenCard";
 import type { Kitten as CardKitten } from "@/lib/mock-kittens";
@@ -22,9 +21,13 @@ type FilterGroup = {
 type FilterKey = "Breed" | "Gender" | "Colour" | "Availability";
 type SortOption = "newest" | "price-low" | "price-high";
 
-export default function KittensCatalog({ kittens }: { kittens: CardKitten[] }) {
-  const searchParams = useSearchParams();
-  const initialBreed = searchParams.get("breed");
+export default function KittensCatalog({
+  kittens,
+  initialBreed,
+}: {
+  kittens: CardKitten[];
+  initialBreed?: string | null;
+}) {
   const [selectedBreeds, setSelectedBreeds] = useState<string[]>(() => {
     if (!initialBreed) {
       return [];

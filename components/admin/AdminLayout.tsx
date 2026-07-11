@@ -71,10 +71,7 @@ export default function AdminLayout({
 
           <nav className="mt-6 space-y-2.5">
             {navigationItems.map((item) => {
-              const isActive =
-                item.href === "/admin"
-                  ? pathname === item.href
-                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const isActive = getIsActiveAdminRoute(pathname, item.href);
 
               return (
                 <Link
@@ -140,6 +137,22 @@ export default function AdminLayout({
       </div>
     </div>
   );
+}
+
+function getIsActiveAdminRoute(pathname: string, href: string) {
+  if (href === "/admin") {
+    return pathname === href;
+  }
+
+  if (href === "/admin/kittens") {
+    return pathname === href || pathname.startsWith("/admin/kittens/") && !pathname.startsWith("/admin/kittens/new");
+  }
+
+  if (href === "/admin/kittens/new") {
+    return pathname === href;
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 function DashboardIcon({ className }: { className?: string }) {

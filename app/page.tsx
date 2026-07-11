@@ -7,8 +7,6 @@ import { mapSupabaseKittenToCard } from "@/lib/mappers/kitten";
 import { getSiteSettings } from "@/lib/supabase/queries/settings";
 import { getFeaturedKittens } from "@/lib/supabase/queries/kittens";
 
-export const dynamic = "force-dynamic";
-
 export default async function HomePage() {
   let featuredKittens: Awaited<ReturnType<typeof getFeaturedKittens>> = [];
 

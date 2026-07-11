@@ -9,10 +9,15 @@ export const metadata = {
   title: "Our Kittens",
 };
 
-export const dynamic = "force-dynamic";
-
-export default async function KittensPage() {
+export default async function KittensPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   let kittens: Awaited<ReturnType<typeof getKittens>> = [];
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const breedParam = resolvedSearchParams.breed;
+  const initialBreed = Array.isArray(breedParam) ? breedParam[0] : breedParam;
 
   try {
     kittens = await getKittens();
@@ -35,7 +40,7 @@ export default async function KittensPage() {
         imageClassName="object-cover object-center md:object-[75%_center] lg:object-[72%_center]"
       />
 
-      <KittensCatalog kittens={mappedKittens} />
+      <KittensCatalog kittens={mappedKittens} initialBreed={initialBreed} />
 
       <section className="section-wrap pt-16">
         <div className="soft-panel flex flex-col gap-5 rounded-[2rem] px-6 py-6 sm:px-8 md:flex-row md:items-center md:justify-between">

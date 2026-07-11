@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
   defaultSiteSettings,
@@ -29,68 +30,81 @@ function mergeWithDefaults(settings?: Partial<SiteSettings> | null): SiteSetting
   };
 }
 
-export async function getSiteSettings(): Promise<SiteSettings> {
-  try {
-    const supabase = createServerSupabaseClient();
-    const { data, error } = await supabase
-      .from("site_settings")
-      .select(SETTINGS_SELECT)
-      .limit(1)
-      .maybeSingle();
+const getCachedSiteSettings = unstable_cache(
+  async (): Promise<SiteSettings> => {
+    try {
+      const supabase = createServerSupabaseClient();
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select(SETTINGS_SELECT)
+        .limit(1)
+        .maybeSingle();
 
-    if (error) {
-      console.error("Failed to load site settings from Supabase.", error);
+      if (error) {
+        console.error("Failed to load site settings from Supabase.", error);
+        return defaultSiteSettings;
+      }
+
+      return mergeWithDefaults((data ?? null) as Partial<SiteSettings> | null);
+    } catch (error) {
+      console.error("Unexpected error while loading site settings.", error);
       return defaultSiteSettings;
     }
+  },
+  ["site-settings"],
+  { revalidate: 300 },
+);
 
-    return mergeWithDefaults((data ?? null) as Partial<SiteSettings> | null);
-  } catch (error) {
-    console.error("Unexpected error while loading site settings.", error);
-    return defaultSiteSettings;
-  }
+export async function getSiteSettings(): Promise<SiteSettings> {
+  return getCachedSiteSettings();
 }
 
 export async function updateSiteSettings(
   input: SiteSettingsInput,
   accessToken: string,
 ): Promise<SiteSettings> {
-  const supabase = createServerSupabaseClient(accessToken);
-  const { data: existing, error: existingError } = await supabase
-    .from("site_settings")
-    .select("id")
-    .limit(1)
-    .maybeSingle();
+  try {
+    const authedSupabase = createServerSupabaseClient(accessToken);
+    const { data: existing, error: existingError } = await authedSupabase
+      .from("site_settings")
+      .select("id")
+      .limit(1)
+      .maybeSingle();
 
-  if (existingError) {
-    console.error("Failed to find existing site settings row.", existingError);
-    throw new Error("We couldn't load the current settings. Please try again.");
+    if (existingError) {
+      console.error("Failed to find existing site settings row.", existingError);
+      throw new Error("We couldn't load the current settings. Please try again.");
+    }
+
+    const payload = {
+      business_name: input.business_name,
+      tagline: input.tagline,
+      whatsapp_number: input.whatsapp_number,
+      email: input.email,
+      location: input.location,
+      opening_hours: input.opening_hours,
+      instagram_url: input.instagram_url?.trim() ? input.instagram_url.trim() : null,
+      facebook_url: input.facebook_url?.trim() ? input.facebook_url.trim() : null,
+      hero_title: input.hero_title,
+      hero_description: input.hero_description,
+      kittens_page_title: input.kittens_page_title,
+      kittens_page_description: input.kittens_page_description,
+    };
+
+    const query = existing?.id
+      ? authedSupabase.from("site_settings").update(payload).eq("id", existing.id)
+      : authedSupabase.from("site_settings").insert(payload);
+
+    const { data, error } = await query.select(SETTINGS_SELECT).single();
+
+    if (error || !data) {
+      console.error("Failed to save site settings.", error);
+      throw new Error("We couldn't save the settings. Please try again.");
+    }
+
+    return mergeWithDefaults(data as SiteSettings);
+  } catch (error) {
+    console.error("Unexpected error while updating site settings.", error);
+    throw error;
   }
-
-  const payload = {
-    business_name: input.business_name,
-    tagline: input.tagline,
-    whatsapp_number: input.whatsapp_number,
-    email: input.email,
-    location: input.location,
-    opening_hours: input.opening_hours,
-    instagram_url: input.instagram_url?.trim() ? input.instagram_url.trim() : null,
-    facebook_url: input.facebook_url?.trim() ? input.facebook_url.trim() : null,
-    hero_title: input.hero_title,
-    hero_description: input.hero_description,
-    kittens_page_title: input.kittens_page_title,
-    kittens_page_description: input.kittens_page_description,
-  };
-
-  const query = existing?.id
-    ? supabase.from("site_settings").update(payload).eq("id", existing.id)
-    : supabase.from("site_settings").insert(payload);
-
-  const { data, error } = await query.select(SETTINGS_SELECT).single();
-
-  if (error || !data) {
-    console.error("Failed to save site settings.", error);
-    throw new Error("We couldn't save the settings. Please try again.");
-  }
-
-  return mergeWithDefaults(data as SiteSettings);
 }
