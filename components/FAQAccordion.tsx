@@ -23,10 +23,10 @@ export default function FAQAccordion({ items }: FAQAccordionProps) {
         return (
           <div
             key={item.question}
-            className={`overflow-hidden rounded-[18px] border transition-all duration-200 ease-out ${
+            className={`overflow-hidden rounded-[18px] border transition-colors duration-200 ease-out md:transition-[border-color,background-color,box-shadow,transform] ${
               isOpen
                 ? "border-[#EF6F91] bg-[linear-gradient(180deg,#FFF8FB_0%,#FFFFFF_100%)] shadow-[0_20px_50px_rgba(239,111,145,0.10)]"
-                : "border-[#F3D6DE] bg-white shadow-[0_14px_36px_rgba(0,0,0,0.04)] hover:-translate-y-[2px]"
+                : "border-[#F3D6DE] bg-white shadow-[0_14px_36px_rgba(0,0,0,0.04)] md:hover:-translate-y-[2px]"
             }`}
           >
             <button
@@ -59,8 +59,12 @@ export default function FAQAccordion({ items }: FAQAccordionProps) {
 
             <div
               id={contentId}
-              className={`grid transition-all duration-200 ease-out ${
-                isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+              className={`${
+                isOpen
+                  ? "block md:grid md:grid-rows-[1fr] md:opacity-100"
+                  : "hidden md:grid md:grid-rows-[0fr] md:opacity-0"
+              } md:transition-[grid-template-rows,opacity] md:duration-200 md:ease-out ${
+                isOpen ? "" : "md:pointer-events-none"
               }`}
             >
               <div className="overflow-hidden">
