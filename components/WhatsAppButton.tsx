@@ -8,15 +8,27 @@ type WhatsAppButtonProps = {
   phoneNumber?: string;
 };
 
-function sanitizePhoneNumber(phoneNumber: string) {
-  return phoneNumber.replace(/\D/g, "");
+export function normalizeWhatsAppNumber(phoneNumber: string) {
+  const digits = phoneNumber.replace(/\D/g, "");
+
+  if (digits.startsWith("00")) {
+    return digits.slice(2);
+  }
+
+  if (digits.startsWith("0")) {
+    return `44${digits.slice(1)}`;
+  }
+
+  return digits;
 }
 
 export function buildWhatsAppUrl(
   message: string,
   phoneNumber = defaultSiteSettings.whatsapp_number,
 ) {
-  return `https://wa.me/${sanitizePhoneNumber(phoneNumber)}?text=${encodeURIComponent(message)}`;
+  const number = normalizeWhatsAppNumber(phoneNumber);
+
+  return `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(message)}`;
 }
 
 export default function WhatsAppButton({

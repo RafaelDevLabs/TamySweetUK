@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import CookieSettingsLink from "@/components/consent/CookieSettingsLink";
+import { normalizeWhatsAppNumber } from "@/components/WhatsAppButton";
 import type { SiteSettings } from "@/lib/types/settings";
 
 const exploreLinks = [
@@ -12,14 +13,10 @@ const exploreLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
-function sanitizePhoneNumber(phoneNumber: string) {
-  return phoneNumber.replace(/\D/g, "");
-}
-
 export default function Footer({ settings }: { settings: SiteSettings }) {
   const touchLinks = [
     {
-      href: `https://wa.me/${sanitizePhoneNumber(settings.whatsapp_number)}`,
+      href: `https://api.whatsapp.com/send?phone=${normalizeWhatsAppNumber(settings.whatsapp_number)}`,
       label: "WhatsApp",
     },
     ...(settings.instagram_url ? [{ href: settings.instagram_url, label: "Instagram" }] : []),
