@@ -2,7 +2,6 @@ import Image from "next/image";
 
 export type ParentProfile = {
   role: "Mother" | "Father";
-  name: string;
   image: string;
   imagePosition: string;
   breed: string;
@@ -20,7 +19,6 @@ const parentSectionIntro =
 const parentProfiles: ParentProfile[] = [
   {
     role: "Mother",
-    name: "Name to be confirmed",
     image: "/breed/parents/mom.jpg",
     imagePosition: "object-[center_42%]",
     breed: "British Shorthair",
@@ -32,7 +30,6 @@ const parentProfiles: ParentProfile[] = [
   },
   {
     role: "Father",
-    name: "Name to be confirmed",
     image: "/breed/parents/dad.jpg",
     imagePosition: "object-[center_38%]",
     breed: "British Shorthair",
@@ -78,8 +75,7 @@ export default function MeetTheParents() {
               </div>
               <div className="p-5 lg:p-6">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#EF6F91]">{parent.role}</p>
-                <h3 className="mt-2 mb-[18px] font-serif text-[26px] leading-[1.15] text-[#2F2A2A] lg:text-[30px]">{parent.name}</h3>
-                <dl className="flex flex-col gap-3 border-t border-[#F3D6DE] pt-5 text-[14px] leading-[1.55]">
+                <dl className="mt-4 flex flex-col gap-3 border-t border-[#F3D6DE] pt-5 text-[14px] leading-[1.55]">
                   <Detail label="Breed" value={parent.breed} />
                   <Detail label="Colour" value={parent.colour} />
                   <Detail label="Registration" value={parent.registration} />
