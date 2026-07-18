@@ -17,7 +17,6 @@ export async function generateMetadata(): Promise<Metadata> {
     title: settings.kittens_page_title,
     description: settings.kittens_page_description,
     path: "/kittens",
-    image: "/hero/hero-about.png",
     keywords: ["available kittens UK", "British Shorthair kittens", "TamysweetUK kittens"],
   });
 }

@@ -86,7 +86,6 @@ export const metadata: Metadata = createSeoMetadata({
   description:
     "Learn about TamysweetUK, our family-raised kittens, and the care, health checks, and support behind every kitten we place in a new home.",
   path: "/about",
-  image: "/design/home-about.png",
 });
 
 export default function AboutPage() {

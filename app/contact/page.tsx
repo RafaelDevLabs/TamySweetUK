@@ -15,7 +15,6 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "Contact TamysweetUK",
     description: `Contact TamysweetUK to ask about available kittens, future litters, viewings, or finding the right kitten for your family in the UK.`,
     path: "/contact",
-    image: "/hero/hero-about.png",
     keywords: ["contact TamysweetUK", "kitten enquiries UK", "available kittens contact"],
   });
 }

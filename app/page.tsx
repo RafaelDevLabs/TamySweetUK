@@ -24,7 +24,6 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "Family-Raised Kittens in the UK",
     description: `${settings.hero_description} View available kittens, learn about our breeding approach, and get in touch with TamysweetUK.`,
     path: "/",
-    image: "/hero/hero-home.png",
     keywords: ["family-raised kittens UK", "TamysweetUK", "available kittens", "British Shorthair kittens UK"],
   });
 }

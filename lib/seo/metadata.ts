@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 
-const SITE_URL = "https://tamysweetuk.co.uk";
-const DEFAULT_OG_IMAGE = "/design/big-logo.jpg";
+const SITE_URL = "https://www.tamysweetuk.co.uk";
+export const DEFAULT_SEO_TITLE = "TamysweetUK | Healthy British Shorthair Kittens";
+export const DEFAULT_SEO_DESCRIPTION =
+  "Trusted UK British Shorthair kitten seller. Healthy, vaccinated and well-socialised kittens looking for loving homes.";
+export const DEFAULT_OG_IMAGE = "/og-image.png";
+export const DEFAULT_OG_IMAGE_ALT = "TamysweetUK - Healthy kittens, happy homes";
 
 type SeoMetadataInput = {
   title: string;
   description: string;
   path?: string;
-  image?: string;
   keywords?: string[];
 };
 
@@ -33,11 +36,10 @@ export function createSeoMetadata({
   title,
   description,
   path = "/",
-  image = DEFAULT_OG_IMAGE,
   keywords,
 }: SeoMetadataInput): Metadata {
   const absoluteUrl = createAbsoluteUrl(path);
-  const absoluteImageUrl = createAbsoluteUrl(image);
+  const absoluteImageUrl = createAbsoluteUrl(DEFAULT_OG_IMAGE);
 
   return {
     title,
@@ -56,7 +58,9 @@ export function createSeoMetadata({
       images: [
         {
           url: absoluteImageUrl,
-          alt: title,
+          width: 1200,
+          height: 630,
+          alt: DEFAULT_OG_IMAGE_ALT,
         },
       ],
     },

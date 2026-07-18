@@ -29,7 +29,6 @@ export const metadata: Metadata = createSeoMetadata({
   description:
     "Discover the British Shorthair breed, including temperament, family suitability, and what makes these calm, affectionate cats such popular companions.",
   path: "/breeds",
-  image: britishShorthair.image,
 });
 
 export default function BreedsPage() {

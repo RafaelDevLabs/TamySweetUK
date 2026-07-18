@@ -64,13 +64,10 @@ export async function generateMetadata({ params }: KittenDetailPageProps): Promi
       });
     }
 
-    const images = resolveKittenImageUrls(kitten);
-
     return createSeoMetadata({
       title: `${kitten.name} ${kitten.breed} kitten`,
       description: kitten.short_description,
       path: `/kittens/${kitten.slug}`,
-      image: images[0],
       keywords: [kitten.name, kitten.breed, `${kitten.colour} kitten`, "TamysweetUK kitten"],
     });
   } catch (error) {

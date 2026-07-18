@@ -74,7 +74,6 @@ export const metadata: Metadata = createSeoMetadata({
   description:
     "Read feedback from TamysweetUK families who have welcomed one of our kittens into their homes across the UK.",
   path: "/testimonials",
-  image: "/hero/hero-about.png",
 });
 
 export default function TestimonialsPage() {
