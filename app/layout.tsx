@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display } from "next/font/google";
+import { Analytics } from '@vercel/analytics/next';
 
 import AppShell from "@/components/AppShell";
 import { createSeoMetadata, DEFAULT_SEO_DESCRIPTION, DEFAULT_SEO_TITLE, getSiteUrl } from "@/lib/seo/metadata";
@@ -39,6 +40,7 @@ export default function RootLayout({
     <html lang="en-GB" data-scroll-behavior="smooth">
       <body className={`shell ${playfairDisplay.variable}`}>
         <AppShell>{children}</AppShell>
+        <Analytics />
       </body>
     </html>
   );
