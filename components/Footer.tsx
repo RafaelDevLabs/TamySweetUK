@@ -22,7 +22,6 @@ export default function Footer({ settings }: { settings: SiteSettings }) {
       href: `https://wa.me/${sanitizePhoneNumber(settings.whatsapp_number)}`,
       label: "WhatsApp",
     },
-    { href: `mailto:${settings.email}`, label: "Email" },
     ...(settings.instagram_url ? [{ href: settings.instagram_url, label: "Instagram" }] : []),
     ...(settings.facebook_url ? [{ href: settings.facebook_url, label: "Facebook" }] : []),
   ];
@@ -118,7 +117,6 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
   const isExternal =
     href.startsWith("http://") ||
     href.startsWith("https://") ||
-    href.startsWith("mailto:") ||
     href.startsWith("tel:");
 
   if (isExternal) {

@@ -43,7 +43,6 @@ export default async function ContactPage() {
   );
 
   const contactItems = [
-    { label: "Email", value: settings.email, icon: "mail" as const },
     { label: "Phone", value: settings.whatsapp_number, icon: "phone" as const },
     { label: "Location", value: settings.location, icon: "pin" as const },
     { label: "Opening Hours", value: settings.opening_hours, icon: "clock" as const },
@@ -175,7 +174,7 @@ function ContactIcon({
   kind,
   className,
 }: {
-  kind: "mail" | "phone" | "pin" | "clock";
+  kind: "phone" | "pin" | "clock";
   className?: string;
 }) {
   if (kind === "phone") {
@@ -222,22 +221,7 @@ function ContactIcon({
     );
   }
 
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none">
-      <path
-        d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-9Z"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <path
-        d="m5 7 7 5 7-5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
+  return null;
 }
 
 function SocialIcon({
