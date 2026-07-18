@@ -47,8 +47,9 @@ export default function CookiePolicyPage() {
             remember settings or support core services.
           </p>
           <p className="text-[16px] leading-8 text-[#5F5A5A]">
-            TamysweetUK currently uses only strictly necessary website storage for administrator
-            sign-in and, if you choose to save settings, your cookie-preference record.
+            TamysweetUK uses strictly necessary website storage for administrator sign-in and, if
+            you choose to save settings, your cookie-preference record. Optional analytics can also
+            run after you enable analytics consent.
           </p>
         </section>
 
@@ -56,9 +57,9 @@ export default function CookiePolicyPage() {
           <h2 className="font-serif text-[30px] leading-tight text-[#2F2A2A]">Current position on consent</h2>
           <p className="text-[16px] leading-8 text-[#5F5A5A]">{AUDIT_NOTES.bannerDecision}</p>
           <p className="text-[16px] leading-8 text-[#5F5A5A]">
-            Analytics, marketing, and optional preference technologies are currently prepared in
-            the codebase to remain off by default. They are not active on the public website at
-            this stage.
+            Vercel Web Analytics remains off by default and only loads on public pages after
+            analytics consent is enabled. Marketing and optional preference technologies remain off
+            by default.
           </p>
         </section>
 
@@ -75,7 +76,7 @@ export default function CookiePolicyPage() {
             />
             <CategoryCard
               title="Analytics"
-              description="Currently inactive and off by default. No analytics service is active on the public website."
+              description="Off by default. Vercel Web Analytics can run after analytics consent is enabled."
             />
             <CategoryCard
               title="Marketing"

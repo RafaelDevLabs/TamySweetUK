@@ -1,5 +1,7 @@
 "use client";
 
+import { Analytics } from "@vercel/analytics/next";
+
 import { useConsent } from "@/components/consent/ConsentProvider";
 
 export default function ConsentScripts() {
@@ -18,7 +20,7 @@ function AnalyticsScripts() {
     return null;
   }
 
-  return null;
+  return <Analytics />;
 }
 
 function MarketingScripts() {

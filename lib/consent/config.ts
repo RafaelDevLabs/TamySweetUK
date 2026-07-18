@@ -5,7 +5,7 @@ import type {
   OptionalConsentCategory,
 } from "@/lib/consent/types";
 
-export const CONSENT_VERSION = "1.0";
+export const CONSENT_VERSION = "1.1";
 export const CONSENT_STORAGE_KEY = "tamysweetuk-consent";
 
 export const CONSENT_CATEGORIES: ConsentCategoryDefinition[] = [
@@ -47,7 +47,7 @@ export const OPTIONAL_CONSENT_CATEGORIES: OptionalConsentCategory[] = [
   "marketing",
 ];
 
-export const OPTIONAL_CONSENT_FEATURES_ACTIVE = false;
+export const OPTIONAL_CONSENT_FEATURES_ACTIVE = true;
 
 export const OPTIONAL_STORAGE_KEYS: Record<OptionalConsentCategory, string[]> = {
   preferences: [],
@@ -92,11 +92,23 @@ export const AUDITED_TECHNOLOGIES: AuditedTechnology[] = [
     affectedFile: "lib/consent/storage.ts",
     recommendedAction: "Keep minimal and store only the consent decision.",
   },
+  {
+    name: "@vercel/analytics",
+    provider: "Vercel",
+    purpose: "Measures page views and basic website usage to help improve the public website.",
+    storageType: "Analytics script request; no first-party cookie is set by this project.",
+    category: "analytics",
+    duration: "Session-level event processing by Vercel; no local browser storage key is configured.",
+    scope: "public",
+    consentRequired: "yes",
+    affectedFile: "components/consent/ConsentScripts.tsx",
+    recommendedAction: "Load only after the visitor enables analytics consent.",
+  },
 ];
 
 export const AUDIT_NOTES = {
   bannerDecision:
-    "No public consent banner is currently required because the audited public website does not load optional analytics, marketing, or preference technologies before user interaction.",
+    "A public consent banner is shown because optional Vercel Web Analytics can load after the visitor enables analytics consent.",
   productionStatement:
     "Implemented according to the current audited website behaviour and documented UK guidance; final business-policy details require owner confirmation.",
 };

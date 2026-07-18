@@ -95,8 +95,9 @@ export default function PrivacyPolicyPage() {
 
         <PolicySection title="7. Website technical data">
           <p>
-            The audited public website does not currently run analytics, advertising pixels, chat
-            widgets, social-media embeds, or optional tracking scripts.
+            The public website can run Vercel Web Analytics after a visitor enables analytics
+            consent. It does not currently run advertising pixels, chat widgets, social-media
+            embeds, or marketing tracking scripts.
           </p>
           <p>
             Public pages use Next.js and Supabase-hosted images. If a visitor saves cookie
