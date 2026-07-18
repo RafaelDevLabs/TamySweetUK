@@ -43,3 +43,21 @@ export type KittenImage = {
 export type KittenWithImages = Kitten & {
   images: KittenImage[];
 };
+
+export type KittenCardData = Pick<
+  Kitten,
+  | "id"
+  | "name"
+  | "slug"
+  | "breed"
+  | "gender"
+  | "age_label"
+  | "colour"
+  | "price"
+  | "availability"
+  | "short_description"
+  | "sort_order"
+  | "created_at"
+> & {
+  images: KittenImage[];
+};

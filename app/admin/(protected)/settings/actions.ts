@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { updateSiteSettings } from "@/lib/supabase/queries/settings";
@@ -52,6 +52,7 @@ export async function saveSiteSettingsAction(formData: FormData) {
       session.accessToken,
     );
 
+    revalidateTag("site-settings", "max");
     revalidatePath("/", "layout");
     revalidatePath("/");
     revalidatePath("/about");

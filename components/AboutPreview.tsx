@@ -30,6 +30,8 @@ export default function AboutPreview() {
             src="/design/home-about.png"
             alt="TamysweetUK kittens"
             fill
+            priority
+            loading="eager"
             className="object-cover object-center"
             sizes="(min-width: 1024px) 52vw, 100vw"
           />

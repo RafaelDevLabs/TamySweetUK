@@ -27,6 +27,16 @@ create table if not exists public.kittens (
   updated_at timestamptz not null default now()
 );
 
+update public.kittens
+set breed = 'British Shorthair'
+where breed is distinct from 'British Shorthair';
+
+alter table public.kittens
+alter column breed set default 'British Shorthair';
+
+alter table public.kittens
+drop constraint if exists kittens_breed_british_shorthair_check;
+
 create table if not exists public.kitten_images (
   id uuid primary key default gen_random_uuid(),
   kitten_id uuid not null references public.kittens(id) on delete cascade,

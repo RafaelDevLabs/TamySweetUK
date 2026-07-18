@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
+
 import CTAButton from "@/components/CTAButton";
 import FAQAccordion from "@/components/FAQAccordion";
 import FAQHero from "@/components/faq/FAQHero";
+import StructuredData from "@/components/seo/StructuredData";
 import { faqItems } from "@/lib/mock-kittens";
+import { createSeoMetadata } from "@/lib/seo/metadata";
+import { createBreadcrumbSchema, createFaqSchema } from "@/lib/seo/schema";
 
 const extendedFaqItems =
   faqItems.length >= 9
@@ -20,13 +25,25 @@ const extendedFaqItems =
         },
       ];
 
-export const metadata = {
-  title: "FAQ",
-};
+export const metadata: Metadata = createSeoMetadata({
+  title: "Kitten FAQ",
+  description:
+    "Find answers to common questions about available kittens, reservations, health checks, registration, and bringing a TamysweetUK kitten home.",
+  path: "/faq",
+});
 
 export default function FAQPage() {
   return (
     <div className="bg-[#FCF9F6] pb-10 lg:pb-14">
+      <StructuredData
+        data={[
+          createBreadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "FAQ", path: "/faq" },
+          ]),
+          createFaqSchema(extendedFaqItems),
+        ]}
+      />
       <FAQHero />
 
       <div className="px-4 pt-0 sm:px-6 lg:px-6">

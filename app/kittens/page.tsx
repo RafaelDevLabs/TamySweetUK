@@ -1,46 +1,66 @@
+import type { Metadata } from "next";
+
 import CTAButton from "@/components/CTAButton";
 import KittensCatalog from "@/components/kittens/KittensCatalog";
 import PageHero from "@/components/PageHero";
+import StructuredData from "@/components/seo/StructuredData";
 import { mapSupabaseKittenToCard } from "@/lib/mappers/kitten";
+import { createSeoMetadata } from "@/lib/seo/metadata";
+import { createBreadcrumbSchema, createKittenListSchema } from "@/lib/seo/schema";
 import { getSiteSettings } from "@/lib/supabase/queries/settings";
 import { getKittens } from "@/lib/supabase/queries/kittens";
 
-export const metadata = {
-  title: "Our Kittens",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+
+  return createSeoMetadata({
+    title: settings.kittens_page_title,
+    description: settings.kittens_page_description,
+    path: "/kittens",
+    image: "/hero/hero-about.png",
+    keywords: ["available kittens UK", "British Shorthair kittens", "TamysweetUK kittens"],
+  });
+}
 
 export default async function KittensPage({
-  searchParams,
+  searchParams: _searchParams,
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  let kittens: Awaited<ReturnType<typeof getKittens>> = [];
-  const resolvedSearchParams = (await searchParams) ?? {};
-  const breedParam = resolvedSearchParams.breed;
-  const initialBreed = Array.isArray(breedParam) ? breedParam[0] : breedParam;
+  void _searchParams;
 
-  try {
-    kittens = await getKittens();
-  } catch (error) {
-    console.error("Failed to load kittens for the /kittens page.", error);
-  }
+  const [kittens, settings] = await Promise.all([
+    getKittens().catch((error) => {
+      console.error("Failed to load kittens for the /kittens page.", error);
+      return [];
+    }),
+    getSiteSettings(),
+  ]);
 
   const mappedKittens = kittens.map(mapSupabaseKittenToCard);
-  const settings = await getSiteSettings();
 
   return (
     <div className="pb-16">
+      <StructuredData
+        data={[
+          createBreadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Kittens", path: "/kittens" },
+          ]),
+          createKittenListSchema(kittens),
+        ]}
+      />
       <PageHero
         eyebrow="HOME / KITTENS"
         title={settings.kittens_page_title}
         description={settings.kittens_page_description}
         imageSrc="/hero/hero-about.png"
-        imageAlt="TamysweetUK kittens page hero"
+        imageAlt="British Shorthair kittens available at TamysweetUK"
         className="page-hero-kittens"
         imageClassName="object-cover object-center md:object-[75%_center] lg:object-[72%_center]"
       />
 
-      <KittensCatalog kittens={mappedKittens} initialBreed={initialBreed} />
+      <KittensCatalog kittens={mappedKittens} />
 
       <section className="section-wrap pt-16">
         <div className="soft-panel flex flex-col gap-5 rounded-[2rem] px-6 py-6 sm:px-8 md:flex-row md:items-center md:justify-between">
@@ -49,9 +69,9 @@ export default async function KittensPage({
               <HeartIcon className="h-10 w-10" />
             </div>
             <div>
-            <p className="font-serif text-[28px] leading-[1.05] text-[var(--foreground)] sm:text-3xl">
+            <h2 className="font-serif text-[28px] leading-[1.05] text-[var(--foreground)] sm:text-3xl">
               Can&apos;t find the perfect kitten?
-            </p>
+            </h2>
             <p className="mt-2 text-sm leading-6 text-[var(--muted)] sm:text-[15px]">
               Join our waiting list and we&apos;ll let you know when new kittens become available.
             </p>

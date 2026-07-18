@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import CookieSettingsLink from "@/components/consent/CookieSettingsLink";
 import type { SiteSettings } from "@/lib/types/settings";
 
 const exploreLinks = [
@@ -75,9 +76,15 @@ export default function Footer({ settings }: { settings: SiteSettings }) {
 
         <div className="mt-7 flex flex-col gap-2 border-t border-[#F3E2E6] pt-4 text-sm text-[#6F6666] md:flex-row md:items-center md:justify-between">
           <p>2026 {settings.business_name}</p>
-          <Link href="/faq" className="transition duration-200 hover:text-[#EF6F91]">
-            Privacy Policy
-          </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link href="/privacy-policy" className="transition duration-200 hover:text-[#EF6F91]">
+              Privacy Policy
+            </Link>
+            <Link href="/cookie-policy" className="transition duration-200 hover:text-[#EF6F91]">
+              Cookie Policy
+            </Link>
+            <CookieSettingsLink />
+          </div>
         </div>
       </div>
     </footer>

@@ -23,8 +23,8 @@ with upserted_bella as (
     sort_order
   )
   values (
-    'Bella',
-    'bella-british-shorthair',
+    'Luna',
+    'luna-british-shorthair',
     'British Shorthair',
     'female',
     null,
@@ -34,8 +34,8 @@ with upserted_bella as (
     'available',
     'Vaccinated & health checked',
     'Sweet, calm & playful',
-    'Bella is a gentle little kitten with a sweet nature and a calm, loving personality.',
-    'Bella is a beautiful British Shorthair girl raised in our family home with daily care and affection. She is confident, cuddly, and already used to everyday household life. She would make a wonderful lifelong companion for a loving family.',
+    'Luna is a gentle little kitten with a sweet nature and a calm, loving personality.',
+    'Luna is a beautiful British Shorthair girl raised in our family home with daily care and affection. She is confident, cuddly, and already used to everyday household life. She would make a wonderful lifelong companion for a loving family.',
     true,
     true,
     true,
@@ -86,7 +86,7 @@ select
   id,
   '/kittens/1.jpg',
   null,
-  'Bella kitten',
+  'Luna kitten',
   true,
   1
 from upserted_bella;
@@ -211,7 +211,7 @@ with upserted_oliver as (
   values (
     'Oliver',
     'oliver-scottish-fold',
-    'Scottish Fold',
+    'British Shorthair',
     'male',
     null,
     '10 weeks',
@@ -304,7 +304,7 @@ with upserted_daisy as (
   values (
     'Daisy',
     'daisy-british-longhair',
-    'British Longhair',
+    'British Shorthair',
     'female',
     null,
     '11 weeks',

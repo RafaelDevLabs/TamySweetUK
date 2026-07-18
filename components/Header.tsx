@@ -11,7 +11,7 @@ const navItems = [
   { href: "/", label: "Home" },
   { href: "/kittens", label: "Kittens" },
   { href: "/about", label: "About Us" },
-  { href: "/breeds", label: "Breeds" },
+  { href: "/breeds", label: "British Shorthair" },
   { href: "/testimonials", label: "Testimonials" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },

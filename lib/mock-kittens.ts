@@ -15,6 +15,11 @@ export type Kitten = {
   included: string[];
 };
 
+export type KittenCard = Pick<
+  Kitten,
+  "id" | "slug" | "name" | "breed" | "gender" | "age" | "colour" | "price" | "availability" | "images"
+>;
+
 export const brandStory =
   "TamysweetUK began in 2020 with our first family cat. What started as love for one special pet grew into a passion for the breed. Today, we focus on raising healthy, well-socialised, affectionate kittens and helping families find lifelong companions.";
 
@@ -24,8 +29,8 @@ const chocolateKitten = ["/kittens/3.jpg", "/kittens/4.jpg"];
 export const mockKittens: Kitten[] = [
   {
     id: "kitten-1",
-    slug: "bella-british-shorthair",
-    name: "Bella",
+    slug: "luna-british-shorthair",
+    name: "Luna",
     breed: "British Shorthair",
     gender: "Female",
     age: "9 weeks",
@@ -35,7 +40,7 @@ export const mockKittens: Kitten[] = [
     healthStatus: "Vet checked, first vaccination completed, microchip booked.",
     temperament: "Gentle, cuddly, playful around children, and confident in a busy home.",
     description:
-      "Bella is a calm little girl with a sweet expression and a very affectionate nature. She loves soft blankets, lap cuddles, and follows us from room to room.",
+      "Luna is a calm little girl with a sweet expression and a very affectionate nature. She loves soft blankets, lap cuddles, and follows us from room to room.",
     images: [creamKitten[0], creamKitten[1], creamKitten[0]],
     included: [
       "Vaccination record",
@@ -70,7 +75,7 @@ export const mockKittens: Kitten[] = [
     id: "kitten-3",
     slug: "oliver-scottish-fold",
     name: "Oliver",
-    breed: "Scottish Fold",
+    breed: "British Shorthair",
     gender: "Male",
     age: "11 weeks",
     colour: "Silver tabby",
@@ -92,7 +97,7 @@ export const mockKittens: Kitten[] = [
     id: "kitten-4",
     slug: "daisy-british-longhair",
     name: "Daisy",
-    breed: "British Longhair",
+    breed: "British Shorthair",
     gender: "Female",
     age: "12 weeks",
     colour: "Cream",
@@ -136,7 +141,7 @@ export const mockKittens: Kitten[] = [
     id: "kitten-6",
     slug: "luna-british-longhair",
     name: "Luna",
-    breed: "British Longhair",
+    breed: "British Shorthair",
     gender: "Female",
     age: "9 weeks",
     colour: "Blue cream",
@@ -240,38 +245,63 @@ export const testimonials = [
 
 export const faqItems = [
   {
-    question: "When are kittens ready to leave?",
+    question: "When can my kitten go to their new home?",
     answer:
-      "Our kittens usually leave for their new homes from around 8 to 12 weeks, once they are confident, weaned, and ready for the transition.",
+      "Our kittens usually leave for their new homes between 10 and 12 weeks of age. By this time they are fully weaned, well socialised, confident, vet checked, vaccinated and ready to begin life with their new family.",
   },
   {
-    question: "Are kittens vaccinated and health checked?",
+    question: "Can I meet the parents?",
     answer:
-      "Yes. Every kitten is health checked and we share the details of vaccinations and vet care before they leave us.",
+      "Yes. The parents can be seen, and you can also learn more about them on our British Shorthair page in the Meet the Parents section.",
   },
   {
-    question: "Can I reserve a kitten?",
+    question: "Are the parents health tested?",
     answer:
-      "Yes, when a kitten is available we can discuss reservations and the next steps after an initial conversation.",
+      "Yes. Both parents are TICA and GCCF registered and have been genetically tested with clear negative results for hereditary conditions.",
   },
   {
-    question: "Do you offer delivery?",
+    question: "Are the kittens vaccinated and health checked?",
     answer:
-      "We are happy to discuss safe handover or delivery options within the UK depending on location and what is best for the kitten.",
+      "Yes. Before leaving, every kitten is vet checked, vaccinated as appropriate for their age, microchipped, flea treated and worm treated.",
+  },
+  {
+    question: "Will my kitten come with registration papers?",
+    answer:
+      "Yes. Your kitten will leave with the relevant registration documentation and information provided for their new family.",
+  },
+  {
+    question: "Are the kittens raised in a family home?",
+    answer:
+      "Yes. Our kittens are raised in a loving family home with lots of care and attention. They are well socialised and used to everyday household noises.",
+  },
+  {
+    question: "Are the kittens litter trained?",
+    answer:
+      "Yes. Before leaving for their new homes, the kittens are litter trained and introduced to using a scratch post.",
+  },
+  {
+    question: "What is included with my kitten?",
+    answer:
+      "Each kitten leaves with a kitten pack that includes food, a blanket carrying their mum's scent, and helpful care information for the first days in their new home.",
+  },
+  {
+    question: "Can I choose my own kitten?",
+    answer:
+      "Absolutely. We are happy to help you choose the kitten that best matches your family and lifestyle. We always aim to find the right home for every kitten, ensuring a happy match for both the kitten and its new family.",
   },
   {
     question: "What do the kittens eat?",
     answer:
-      "Our kittens are raised on a quality feeding routine and we will share their current food and schedule so the move feels smooth.",
+      "The kittens leave on a suitable diet they are already familiar with. Food is also included in the kitten pack to help make the transition to their new home as smooth as possible.",
+  },
+  {
+    question: "Can I reserve a kitten?",
+    answer:
+      "Yes. A £300 non-refundable deposit is required to reserve your chosen kitten. Once reserved, the kitten is held exclusively for you until collection.",
   },
   {
     question: "Do you provide support after adoption?",
     answer:
-      "Absolutely. We stay available for guidance after your kitten goes home because we care about lifelong happy placements.",
-  },
-  {
-    question: "Can I visit the kittens before choosing?",
-    answer:
-      "Yes, visits can be arranged by conversation so families feel comfortable and kittens remain safe and settled.",
+      "Yes. We are always happy to offer advice and support after your kitten joins your family, including help with settling in, feeding and general care.",
   },
 ];

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 import { buildWhatsAppUrl } from "@/components/WhatsAppButton";
@@ -140,6 +141,16 @@ export default function ContactForm({
       <div className="mt-4 flex items-center gap-3 text-sm text-[#6F6666]">
         <CheckIcon className="h-[18px] w-[18px] shrink-0 text-[#EF6F91]" />
         <p>Your message will open in WhatsApp so I can reply faster.</p>
+      </div>
+
+      <div className="mt-4 rounded-[20px] border border-[#F3E2E6] bg-[#FCF9F6] px-4 py-4 text-sm leading-7 text-[#5F5A5A]">
+        By using this form, you choose what information to include in your WhatsApp enquiry. Your
+        message is not submitted to the website server; it opens in WhatsApp on your device.
+        Please read our{" "}
+        <Link href="/privacy-policy" className="font-semibold text-[#EF6F91] underline-offset-4 hover:underline">
+          Privacy Policy
+        </Link>{" "}
+        before sending personal information.
       </div>
     </form>
   );

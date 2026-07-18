@@ -1,6 +1,5 @@
-import { getSupabaseClient } from "@/lib/supabase/client";
-import type { Kitten as MockKitten } from "@/lib/mock-kittens";
-import type { KittenAvailability, KittenWithImages } from "@/lib/types/kitten";
+import type { KittenCard as MockKitten } from "@/lib/mock-kittens";
+import type { KittenAvailability, KittenCardData, KittenImage, KittenWithImages } from "@/lib/types/kitten";
 
 export const availabilityMap: Record<KittenAvailability, MockKitten["availability"]> = {
   available: "Available",
@@ -13,20 +12,22 @@ export const genderMap = {
   female: "Female",
 } as const;
 
-export function resolveImageUrl(image: KittenWithImages["images"][number]) {
-  if (image.storage_path) {
-    const supabase = getSupabaseClient();
-    const { data } = supabase.storage.from("kitten-images").getPublicUrl(image.storage_path);
+export function resolveImageUrl(image: KittenImage) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
 
-    if (data.publicUrl) {
-      return data.publicUrl;
-    }
+  if (image.storage_path && supabaseUrl) {
+    const encodedPath = image.storage_path
+      .split("/")
+      .map((segment) => encodeURIComponent(segment))
+      .join("/");
+
+    return `${supabaseUrl}/storage/v1/object/public/kitten-images/${encodedPath}`;
   }
 
   return image.url;
 }
 
-export function resolveKittenImageUrls(kitten: KittenWithImages) {
+export function resolveKittenImageUrls(kitten: Pick<KittenWithImages, "images">) {
   const sortedImages = [...kitten.images].sort((a, b) => a.sort_order - b.sort_order);
   const primaryFirst = sortedImages.sort((a, b) => Number(b.is_primary) - Number(a.is_primary));
   const images = primaryFirst.map(resolveImageUrl).filter(Boolean);
@@ -34,7 +35,23 @@ export function resolveKittenImageUrls(kitten: KittenWithImages) {
   return images.length > 0 ? images : ["/kittens/1.jpg"];
 }
 
-export function mapSupabaseKittenToCard(kitten: KittenWithImages): MockKitten {
+export function buildKittenImageAltText({
+  name,
+  breed,
+  colour,
+  index,
+}: {
+  name: string;
+  breed: string;
+  colour: string;
+  index: number;
+}) {
+  const photoLabel = index === 0 ? "portrait" : `photo ${index + 1}`;
+
+  return `${name}, ${colour} ${breed} kitten ${photoLabel}`;
+}
+
+export function mapSupabaseKittenToCard(kitten: KittenCardData): MockKitten {
   return {
     id: kitten.id,
     slug: kitten.slug,
@@ -45,15 +62,6 @@ export function mapSupabaseKittenToCard(kitten: KittenWithImages): MockKitten {
     colour: kitten.colour,
     price: kitten.price,
     availability: availabilityMap[kitten.availability],
-    healthStatus: kitten.health_status,
-    temperament: kitten.temperament ?? "",
-    description: kitten.description ?? kitten.short_description,
     images: resolveKittenImageUrls(kitten),
-    included: [
-      kitten.vaccinated ? "Vaccinated" : null,
-      kitten.wormed ? "Wormed" : null,
-      kitten.litter_trained ? "Litter trained" : null,
-      kitten.tica_registered ? "TICA registered" : null,
-    ].filter((value): value is string => Boolean(value)),
   };
 }

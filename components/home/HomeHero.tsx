@@ -16,9 +16,11 @@ export default function HomeHero({ settings }: { settings: SiteSettings }) {
       <div className="absolute inset-0 z-0 w-full lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[58%]">
         <Image
           src="/hero/hero-home.png"
-          alt="TamysweetUK kittens"
+          alt="British Shorthair kittens raised at TamysweetUK"
           fill
           priority
+          fetchPriority="high"
+          quality={85}
           className="object-cover object-[62%_center]"
           sizes="(min-width: 1024px) 58vw, 100vw"
         />

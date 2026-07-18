@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { updateKitten } from "@/app/admin/(protected)/kittens/[id]/edit/actions";
 import { createKitten, type NewKittenFormState } from "@/app/admin/(protected)/kittens/new/actions";
+import { buildDefaultKittenSlug, slugify } from "@/lib/kittens/slug";
 import type { Kitten, KittenImage } from "@/lib/types/kitten";
 
 const initialServerState: NewKittenFormState = {
@@ -21,6 +22,8 @@ const genderOptions = [
   { value: "female", label: "Female" },
   { value: "male", label: "Male" },
 ] as const;
+
+const breedName = "British Shorthair";
 
 const wizardSteps = [
   { id: 1, label: "Details", description: "Profile, care and pricing" },
@@ -51,6 +54,7 @@ type ImageItem = ExistingImageItem | NewImageItem;
 
 type FormState = {
   name: string;
+  slug: string;
   breed: string;
   gender: string;
   age_label: string;
@@ -73,7 +77,8 @@ type FormState = {
 
 const initialFormState: FormState = {
   name: "",
-  breed: "",
+  slug: "",
+  breed: breedName,
   gender: "",
   age_label: "",
   colour: "",
@@ -104,7 +109,8 @@ function mapKittenToFormState(kitten?: Kitten): FormState {
 
   return {
     name: kitten.name,
-    breed: kitten.breed,
+    slug: kitten.slug,
+    breed: breedName,
     gender: kitten.gender,
     age_label: kitten.age_label,
     colour: kitten.colour,
@@ -154,6 +160,7 @@ function textareaClassName() {
 function getMissingRequiredFields(formState: FormState) {
   const requiredFields: Array<keyof FormState> = [
     "name",
+    "slug",
     "breed",
     "gender",
     "age_label",
@@ -241,6 +248,7 @@ export default function NewKittenForm({
 }) {
   const [currentStep, setCurrentStep] = useState<(typeof wizardSteps)[number]["id"]>(1);
   const [formState, setFormState] = useState<FormState>(() => mapKittenToFormState(initialKitten));
+  const [hasCustomSlug, setHasCustomSlug] = useState(mode === "edit" || Boolean(initialKitten?.slug));
   const [images, setImages] = useState<ImageItem[]>(() => mapImagesToState(initialImages));
   const [dragActive, setDragActive] = useState(false);
   const [clientError, setClientError] = useState<string | null>(null);
@@ -262,6 +270,8 @@ export default function NewKittenForm({
   const headingTitle = mode === "edit" ? "Edit Kitten" : "Add New Kitten";
   const submitLabel = mode === "edit" ? "Save Changes" : "Publish Kitten";
   const submitPendingLabel = mode === "edit" ? "Saving changes..." : "Saving kitten...";
+  const resolvedSlug =
+    mode === "create" && !hasCustomSlug ? buildDefaultKittenSlug(formState.name) : formState.slug;
 
   const orderedImages = useMemo(() => images, [images]);
   const primaryPreviewImage = orderedImages[0] ?? null;
@@ -360,7 +370,8 @@ export default function NewKittenForm({
     }
 
     data.set("name", formState.name);
-    data.set("breed", formState.breed);
+    data.set("slug", resolvedSlug);
+    data.set("breed", breedName);
     data.set("gender", formState.gender);
     data.set("age_label", formState.age_label);
     data.set("colour", formState.colour);
@@ -483,7 +494,17 @@ export default function NewKittenForm({
         <section className="rounded-[30px] border border-[#F3E2E6] bg-white p-6 shadow-[0_20px_50px_rgba(0,0,0,0.04)] sm:p-8">
           <div className="grid gap-5 md:grid-cols-2">
             <Field label="Name" required value={formState.name} onChange={(value) => updateField("name", value)} />
-            <Field label="Breed" required value={formState.breed} onChange={(value) => updateField("breed", value)} />
+            <Field
+              label="Slug"
+              required
+              placeholder="luna-british-shorthair"
+              value={resolvedSlug}
+              onChange={(value) => {
+                setHasCustomSlug(true);
+                updateField("slug", slugify(value));
+              }}
+            />
+            <ReadOnlyField label="Breed" value={breedName} />
             <SelectField
               label="Gender"
               required
@@ -725,7 +746,7 @@ export default function NewKittenForm({
                     <h4 className="font-serif text-[30px] leading-none text-[#2F2A2A]">
                       {formState.name || "Kitten name"}
                     </h4>
-                    <p className="mt-2 text-sm text-[#7A7272]">{formState.breed || "Breed"}</p>
+                    <p className="mt-2 text-sm text-[#7A7272]">{breedName}</p>
                   </div>
                   <p className="text-right text-[28px] font-bold leading-none text-[#EF6F91]">
                     {formState.price ? `£${formState.price}` : "£0"}
@@ -852,6 +873,22 @@ function Field({
         placeholder={placeholder}
         className={inputClassName()}
       />
+    </div>
+  );
+}
+
+function ReadOnlyField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="space-y-2">
+      <label htmlFor={createFieldIdentifier(label)} className="text-sm font-medium text-[#2F2A2A]">
+        {label}
+      </label>
+      <div
+        id={createFieldIdentifier(label)}
+        className="flex h-12 w-full items-center rounded-2xl border border-[#F3E2E6] bg-[#FFF7FA] px-4 text-[#2F2A2A]"
+      >
+        {value}
+      </div>
     </div>
   );
 }

@@ -1,7 +1,11 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 
 import CTAButton from "@/components/CTAButton";
 import PageHero from "@/components/PageHero";
+import StructuredData from "@/components/seo/StructuredData";
+import { createSeoMetadata } from "@/lib/seo/metadata";
+import { createBreadcrumbSchema } from "@/lib/seo/schema";
 
 const stats = [
   {
@@ -65,19 +69,29 @@ const testimonials = [
   },
 ] as const;
 
-export const metadata = {
-  title: "Testimonials",
-};
+export const metadata: Metadata = createSeoMetadata({
+  title: "Customer Testimonials",
+  description:
+    "Read feedback from TamysweetUK families who have welcomed one of our kittens into their homes across the UK.",
+  path: "/testimonials",
+  image: "/hero/hero-about.png",
+});
 
 export default function TestimonialsPage() {
   return (
     <div className="bg-[#FCF9F6] pb-16">
+      <StructuredData
+        data={createBreadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Testimonials", path: "/testimonials" },
+        ])}
+      />
       <PageHero
         eyebrow="HOME / TESTIMONIALS"
         title="What Our Families Say"
         description="Nothing makes us happier than hearing how our kittens have brought joy to their new families. Here are some kind words from our amazing customers."
         imageSrc="/hero/hero-about.png"
-        imageAlt="TamysweetUK testimonials page hero"
+        imageAlt="TamysweetUK customer testimonials"
         className="page-hero-kittens"
         imageClassName="object-cover object-center md:object-[75%_center] lg:object-[72%_center]"
       />
@@ -150,7 +164,7 @@ export default function TestimonialsPage() {
                 <div className="relative mt-5 h-[180px] overflow-hidden rounded-[18px] shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
                   <Image
                     src={testimonial.image}
-                    alt={testimonial.name}
+                    alt={`${testimonial.name} from ${testimonial.location}, a TamysweetUK kitten owner`}
                     fill
                     className="object-cover object-center"
                     sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw"
@@ -166,9 +180,9 @@ export default function TestimonialsPage() {
                 <HeartIcon className="h-12 w-12" />
               </div>
               <div className="max-w-[520px]">
-                <p className="text-[18px] leading-[1.5] font-medium text-[#2F2A2A] sm:text-[20px]">
+                <h2 className="text-[18px] leading-[1.5] font-medium text-[#2F2A2A] sm:text-[20px]">
                   Join our happy families
-                </p>
+                </h2>
                 <p className="mt-2 text-[13px] leading-5 text-[#5F5A5A] sm:text-[14px]">
                   Our kittens are raised with love and care,
                   <br />

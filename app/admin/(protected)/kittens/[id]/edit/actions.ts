@@ -1,8 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { getLegacyKittenSlugsForCanonicalSlug } from "@/lib/kittens/legacy-slugs";
+import { slugify } from "@/lib/kittens/slug";
 import { createServerSupabaseClient, requireAdminSession } from "@/lib/supabase/server";
 import type { KittenAvailability, KittenGender, KittenImage } from "@/lib/types/kitten";
 
@@ -13,6 +15,7 @@ export type EditKittenFormState = {
 const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const maxImageCount = 8;
 const maxImageSize = 10 * 1024 * 1024;
+const breedName = "British Shorthair";
 
 function sanitizeFileName(value: string) {
   return value
@@ -31,20 +34,42 @@ function getOptionalString(formData: FormData, key: string) {
   return value ? value : null;
 }
 
+async function isSlugTaken(slug: string, kittenId: string, accessToken: string) {
+  const supabase = createServerSupabaseClient(accessToken);
+  const { data, error } = await supabase
+    .from("kittens")
+    .select("id")
+    .eq("slug", slug)
+    .neq("id", kittenId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed while checking slug uniqueness.", error);
+    throw new Error("We couldn't validate the kitten slug. Please try again.");
+  }
+
+  return Boolean(data);
+}
+
 export async function updateKitten(
   _prevState: EditKittenFormState,
   formData: FormData,
 ): Promise<EditKittenFormState> {
   const session = await requireAdminSession();
   let currentKittenSlug = "";
+  let nextKittenSlug = "";
   const kittenId = String(formData.get("kitten_id") ?? "").trim();
+  const requestedSlug = slugify(String(formData.get("slug") ?? "").trim());
 
   if (!kittenId) {
     return { error: "We couldn't identify which kitten to update." };
   }
 
+  if (!requestedSlug) {
+    return { error: "Please enter a valid slug using letters, numbers, and hyphens only." };
+  }
+
   const name = String(formData.get("name") ?? "").trim();
-  const breed = String(formData.get("breed") ?? "").trim();
   const gender = String(formData.get("gender") ?? "").trim() as KittenGender;
   const ageLabel = String(formData.get("age_label") ?? "").trim();
   const colour = String(formData.get("colour") ?? "").trim();
@@ -58,7 +83,6 @@ export async function updateKitten(
 
   if (
     !name ||
-    !breed ||
     !ageLabel ||
     !colour ||
     !healthStatus ||
@@ -133,6 +157,15 @@ export async function updateKitten(
     }
 
     currentKittenSlug = currentKitten.slug;
+    nextKittenSlug = requestedSlug;
+
+    if (requestedSlug !== currentKitten.slug) {
+      const slugTaken = await isSlugTaken(requestedSlug, kittenId, session.accessToken);
+
+      if (slugTaken) {
+        return { error: "That slug is already in use by another kitten. Please choose a different one." };
+      }
+    }
 
     const currentImages = (currentKitten.images ?? []) as Array<
       Pick<KittenImage, "id" | "storage_path" | "sort_order">
@@ -142,7 +175,8 @@ export async function updateKitten(
       .from("kittens")
       .update({
         name,
-        breed,
+        slug: requestedSlug,
+        breed: breedName,
         gender,
         date_of_birth: dateOfBirth,
         age_label: ageLabel,
@@ -200,7 +234,7 @@ export async function updateKitten(
 
     for (const [index, file] of newImageFiles.entries()) {
       const safeFileName = sanitizeFileName(file.name) || `image-${index + 1}.jpg`;
-      const storagePath = `${currentKitten.slug}/${Date.now()}-${index + 1}-${safeFileName}`;
+      const storagePath = `${nextKittenSlug || currentKitten.slug}/${Date.now()}-${index + 1}-${safeFileName}`;
       const fileBuffer = Buffer.from(await file.arrayBuffer());
 
       const { error: uploadError } = await supabase.storage
@@ -263,10 +297,17 @@ export async function updateKitten(
     return { error: "Something went wrong while updating the kitten. Please try again." };
   }
 
+  revalidateTag("kittens", "max");
   revalidatePath("/");
   revalidatePath("/kittens");
   if (currentKittenSlug) {
     revalidatePath(`/kittens/${currentKittenSlug}`);
+  }
+  if (nextKittenSlug && nextKittenSlug !== currentKittenSlug) {
+    revalidatePath(`/kittens/${nextKittenSlug}`);
+  }
+  for (const legacySlug of getLegacyKittenSlugsForCanonicalSlug(nextKittenSlug || currentKittenSlug)) {
+    revalidatePath(`/kittens/${legacySlug}`);
   }
   redirect("/admin/kittens");
 }

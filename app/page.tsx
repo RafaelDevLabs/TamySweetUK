@@ -1,26 +1,55 @@
+import type { Metadata } from "next";
+
 import AboutPreview from "@/components/AboutPreview";
 import CTAButton from "@/components/CTAButton";
 import KittenCard from "@/components/KittenCard";
+import StructuredData from "@/components/seo/StructuredData";
 import HomeFeatures from "@/components/home/HomeFeatures";
 import HomeHero from "@/components/home/HomeHero";
 import { mapSupabaseKittenToCard } from "@/lib/mappers/kitten";
+import { createSeoMetadata } from "@/lib/seo/metadata";
+import {
+  createBreadcrumbSchema,
+  createKittenListSchema,
+  createOrganizationSchema,
+  createWebsiteSchema,
+} from "@/lib/seo/schema";
 import { getSiteSettings } from "@/lib/supabase/queries/settings";
 import { getFeaturedKittens } from "@/lib/supabase/queries/kittens";
 
-export default async function HomePage() {
-  let featuredKittens: Awaited<ReturnType<typeof getFeaturedKittens>> = [];
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
 
-  try {
-    featuredKittens = await getFeaturedKittens(4);
-  } catch (error) {
-    console.error("Failed to load featured kittens for the homepage.", error);
-  }
+  return createSeoMetadata({
+    title: "Family-Raised Kittens in the UK",
+    description: `${settings.hero_description} View available kittens, learn about our breeding approach, and get in touch with TamysweetUK.`,
+    path: "/",
+    image: "/hero/hero-home.png",
+    keywords: ["family-raised kittens UK", "TamysweetUK", "available kittens", "British Shorthair kittens UK"],
+  });
+}
+
+export default async function HomePage() {
+  const [featuredKittens, settings] = await Promise.all([
+    getFeaturedKittens(4).catch((error) => {
+      console.error("Failed to load featured kittens for the homepage.", error);
+      return [];
+    }),
+    getSiteSettings(),
+  ]);
 
   const mappedFeaturedKittens = featuredKittens.map(mapSupabaseKittenToCard);
-  const settings = await getSiteSettings();
 
   return (
     <div>
+      <StructuredData
+        data={[
+          createOrganizationSchema(settings),
+          createWebsiteSchema(settings),
+          createBreadcrumbSchema([{ name: "Home", path: "/" }]),
+          createKittenListSchema(featuredKittens),
+        ]}
+      />
       <HomeHero settings={settings} />
       <div className="bg-[#FCF9F6] pt-8 sm:pt-10 lg:pt-8">
         <div>
@@ -44,8 +73,8 @@ export default async function HomePage() {
 
           {mappedFeaturedKittens.length > 0 ? (
             <div className="grid justify-items-center gap-7 md:grid-cols-2 xl:grid-cols-4">
-              {mappedFeaturedKittens.map((kitten) => (
-                <KittenCard key={kitten.id} kitten={kitten} />
+              {mappedFeaturedKittens.map((kitten, index) => (
+                <KittenCard key={kitten.id} kitten={kitten} prioritizeImage={index < 4} />
               ))}
             </div>
           ) : (

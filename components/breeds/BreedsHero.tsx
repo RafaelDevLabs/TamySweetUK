@@ -6,20 +6,20 @@ export default function BreedsHero() {
       <div className="mx-auto grid w-full max-w-[1180px] items-center gap-7 px-5 py-10 sm:px-8 md:min-h-[440px] md:grid-cols-[45%_55%] md:gap-8 lg:min-h-[500px] lg:grid-cols-[42%_58%] lg:gap-12 lg:px-6">
         <div className="order-1">
           <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-[#EF6F91]">
-            HOME / BREEDS
+            HOME / BRITISH SHORTHAIR
           </p>
 
           <div className="mt-4 space-y-4">
             <h1 className="font-serif text-[42px] leading-[1.05] font-medium text-[#2F2A2A] sm:text-[52px] lg:text-[72px]">
-              Our Breeds
+              British Shorthair Kittens
             </h1>
             <div className="flex items-center gap-3 text-[var(--pink-deep)]">
               <span className="text-sm">{"\u2665"}</span>
               <span className="h-px w-11 bg-[#EF6F91]/70" />
             </div>
             <p className="max-w-[430px] text-base leading-[1.75] text-[#5F5A5A] sm:text-[17px]">
-              We focus on a few carefully selected breeds that we know and love. Each kitten is
-              raised with care, attention and lots of love in a home environment.
+              We specialise exclusively in British Shorthair kittens, raised in our family home
+              with careful attention to health, temperament and socialisation.
             </p>
           </div>
         </div>
@@ -31,6 +31,8 @@ export default function BreedsHero() {
               alt="TamysweetUK breeds page hero"
               fill
               priority
+              fetchPriority="high"
+              quality={85}
               className="object-cover object-center"
               sizes="(max-width: 767px) 100vw, (max-width: 1023px) 55vw, 58vw"
             />

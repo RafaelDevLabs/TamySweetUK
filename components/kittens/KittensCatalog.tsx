@@ -11,30 +11,17 @@ import {
 } from "react";
 
 import KittenCard from "@/components/KittenCard";
-import type { Kitten as CardKitten } from "@/lib/mock-kittens";
+import type { KittenCard as CardKitten } from "@/lib/mock-kittens";
 
 type FilterGroup = {
-  title: "Breed" | "Gender" | "Colour" | "Availability";
+  title: "Gender" | "Colour" | "Availability";
   items: string[];
 };
 
-type FilterKey = "Breed" | "Gender" | "Colour" | "Availability";
+type FilterKey = "Gender" | "Colour" | "Availability";
 type SortOption = "newest" | "price-low" | "price-high";
 
-export default function KittensCatalog({
-  kittens,
-  initialBreed,
-}: {
-  kittens: CardKitten[];
-  initialBreed?: string | null;
-}) {
-  const [selectedBreeds, setSelectedBreeds] = useState<string[]>(() => {
-    if (!initialBreed) {
-      return [];
-    }
-
-    return kittens.some((kitten) => kitten.breed === initialBreed) ? [initialBreed] : [];
-  });
+export default function KittensCatalog({ kittens }: { kittens: CardKitten[] }) {
   const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
   const [selectedColours, setSelectedColours] = useState<string[]>([]);
   const [selectedAvailability, setSelectedAvailability] = useState<string[]>([]);
@@ -43,7 +30,6 @@ export default function KittensCatalog({
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [isSortDrawerOpen, setIsSortDrawerOpen] = useState(false);
   const [isDesktopSortOpen, setIsDesktopSortOpen] = useState(false);
-  const [draftBreeds, setDraftBreeds] = useState<string[]>([]);
   const [draftGenders, setDraftGenders] = useState<string[]>([]);
   const [draftColours, setDraftColours] = useState<string[]>([]);
   const [draftAvailability, setDraftAvailability] = useState<string[]>([]);
@@ -57,7 +43,6 @@ export default function KittensCatalog({
 
   const filterGroups: FilterGroup[] = useMemo(
     () => [
-      { title: "Breed", items: uniqueSortedValues(kittens.map((kitten) => kitten.breed)) },
       { title: "Gender", items: uniqueSortedValues(kittens.map((kitten) => kitten.gender)) },
       { title: "Colour", items: uniqueSortedValues(kittens.map((kitten) => kitten.colour)) },
       {
@@ -69,7 +54,6 @@ export default function KittensCatalog({
   );
 
   const filters = useDeferredValue({
-    breeds: selectedBreeds,
     genders: selectedGenders,
     colours: selectedColours,
     availability: selectedAvailability,
@@ -78,10 +62,6 @@ export default function KittensCatalog({
 
   const filteredKittens = useMemo(() => {
     const next = kittens.filter((kitten) => {
-      if (filters.breeds.length > 0 && !filters.breeds.includes(kitten.breed)) {
-        return false;
-      }
-
       if (filters.genders.length > 0 && !filters.genders.includes(kitten.gender)) {
         return false;
       }
@@ -114,13 +94,11 @@ export default function KittensCatalog({
   }, [filters, kittens]);
 
   const activeFilterCount =
-    selectedBreeds.length +
     selectedGenders.length +
     selectedColours.length +
     selectedAvailability.length;
 
   const activeFilterChips = [
-    ...selectedBreeds.map((value) => ({ key: "Breed" as const, value })),
     ...selectedGenders.map((value) => ({ key: "Gender" as const, value })),
     ...selectedColours.map((value) => ({ key: "Colour" as const, value })),
     ...selectedAvailability.map((value) => ({ key: "Availability" as const, value })),
@@ -217,7 +195,6 @@ export default function KittensCatalog({
   }, [isFilterDrawerOpen, isSortDrawerOpen]);
 
   function openFilterDrawer() {
-    setDraftBreeds(selectedBreeds);
     setDraftGenders(selectedGenders);
     setDraftColours(selectedColours);
     setDraftAvailability(selectedAvailability);
@@ -230,7 +207,6 @@ export default function KittensCatalog({
   }
 
   function clearAllFilters() {
-    setSelectedBreeds([]);
     setSelectedGenders([]);
     setSelectedColours([]);
     setSelectedAvailability([]);
@@ -238,7 +214,6 @@ export default function KittensCatalog({
   }
 
   function clearDraftFilters() {
-    setDraftBreeds([]);
     setDraftGenders([]);
     setDraftColours([]);
     setDraftAvailability([]);
@@ -250,7 +225,6 @@ export default function KittensCatalog({
   }
 
   function applyDraftFilters() {
-    setSelectedBreeds(draftBreeds);
     setSelectedGenders(draftGenders);
     setSelectedColours(draftColours);
     setSelectedAvailability(draftAvailability);
@@ -263,11 +237,6 @@ export default function KittensCatalog({
   }
 
   function removeFilterChip(key: FilterKey, value: string) {
-    if (key === "Breed") {
-      setSelectedBreeds((current) => current.filter((item) => item !== value));
-      return;
-    }
-
     if (key === "Gender") {
       setSelectedGenders((current) => current.filter((item) => item !== value));
       return;
@@ -291,10 +260,6 @@ export default function KittensCatalog({
   }
 
   function getAppliedSelectionConfig(title: FilterKey) {
-    if (title === "Breed") {
-      return { values: selectedBreeds, setValues: setSelectedBreeds };
-    }
-
     if (title === "Gender") {
       return { values: selectedGenders, setValues: setSelectedGenders };
     }
@@ -307,10 +272,6 @@ export default function KittensCatalog({
   }
 
   function getDraftSelectionConfig(title: FilterKey) {
-    if (title === "Breed") {
-      return { values: draftBreeds, setValues: setDraftBreeds };
-    }
-
     if (title === "Gender") {
       return { values: draftGenders, setValues: setDraftGenders };
     }

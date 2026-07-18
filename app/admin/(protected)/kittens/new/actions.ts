@@ -1,8 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { slugify } from "@/lib/kittens/slug";
 import { createServerSupabaseClient, requireAdminSession } from "@/lib/supabase/server";
 import type { KittenAvailability, KittenGender } from "@/lib/types/kitten";
 
@@ -13,16 +14,7 @@ export type NewKittenFormState = {
 const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const maxImageCount = 8;
 const maxImageSize = 10 * 1024 * 1024;
-
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .normalize("NFKD")
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+const breedName = "British Shorthair";
 
 function sanitizeFileName(value: string) {
   return value
@@ -32,31 +24,20 @@ function sanitizeFileName(value: string) {
     .replace(/[^a-z0-9.-]/g, "");
 }
 
-async function generateUniqueSlug(baseName: string, accessToken: string) {
+async function isSlugTaken(slug: string, accessToken: string) {
   const supabase = createServerSupabaseClient(accessToken);
-  const baseSlug = slugify(baseName) || `kitten-${Date.now()}`;
-  let candidate = baseSlug;
+  const { data, error } = await supabase
+    .from("kittens")
+    .select("id")
+    .eq("slug", slug)
+    .maybeSingle();
 
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const { data, error } = await supabase
-      .from("kittens")
-      .select("id")
-      .eq("slug", candidate)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Failed while checking slug uniqueness.", error);
-      throw new Error("We couldn't validate the kitten slug. Please try again.");
-    }
-
-    if (!data) {
-      return candidate;
-    }
-
-    candidate = `${baseSlug}-${Date.now().toString().slice(-6)}${attempt > 0 ? `-${attempt}` : ""}`;
+  if (error) {
+    console.error("Failed while checking slug uniqueness.", error);
+    throw new Error("We couldn't validate the kitten slug. Please try again.");
   }
 
-  return `${baseSlug}-${Date.now().toString().slice(-8)}`;
+  return Boolean(data);
 }
 
 function getCheckboxValue(formData: FormData, key: string) {
@@ -75,7 +56,7 @@ export async function createKitten(
   const session = await requireAdminSession();
 
   const name = String(formData.get("name") ?? "").trim();
-  const breed = String(formData.get("breed") ?? "").trim();
+  const slugInput = slugify(String(formData.get("slug") ?? "").trim());
   const gender = String(formData.get("gender") ?? "").trim() as KittenGender;
   const ageLabel = String(formData.get("age_label") ?? "").trim();
   const colour = String(formData.get("colour") ?? "").trim();
@@ -89,7 +70,7 @@ export async function createKitten(
 
   if (
     !name ||
-    !breed ||
+    !slugInput ||
     !ageLabel ||
     !colour ||
     !healthStatus ||
@@ -137,7 +118,12 @@ export async function createKitten(
 
   try {
     const supabase = createServerSupabaseClient(session.accessToken);
-    const slug = await generateUniqueSlug(name, session.accessToken);
+    const slugTaken = await isSlugTaken(slugInput, session.accessToken);
+
+    if (slugTaken) {
+      return { error: "That slug is already in use by another kitten. Please choose a different one." };
+    }
+
     const { data: lastKitten, error: lastKittenError } = await supabase
       .from("kittens")
       .select("sort_order")
@@ -156,8 +142,8 @@ export async function createKitten(
       .from("kittens")
       .insert({
         name,
-        slug,
-        breed,
+        slug: slugInput,
+        breed: breedName,
         gender,
         date_of_birth: dateOfBirth,
         age_label: ageLabel,
@@ -227,6 +213,7 @@ export async function createKitten(
     return { error: "Something went wrong while creating the kitten. Please try again." };
   }
 
+  revalidateTag("kittens", "max");
   revalidatePath("/");
   revalidatePath("/kittens");
   redirect("/admin/kittens");

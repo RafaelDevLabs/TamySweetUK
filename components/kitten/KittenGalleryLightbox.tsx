@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 
 type KittenGalleryLightboxProps = {
   images: string[];
+  imageAlts: string[];
   name: string;
   selectedIndex: number;
   onClose: () => void;
@@ -15,6 +16,7 @@ type KittenGalleryLightboxProps = {
 
 export default function KittenGalleryLightbox({
   images,
+  imageAlts,
   name,
   selectedIndex,
   onClose,
@@ -125,7 +127,7 @@ export default function KittenGalleryLightbox({
       >
         <Image
           src={selectedImage}
-          alt={`${name} fullscreen image ${selectedIndex + 1}`}
+          alt={imageAlts[selectedIndex] ?? `${name} fullscreen image ${selectedIndex + 1}`}
           fill
           quality={85}
           className="pointer-events-none object-contain"

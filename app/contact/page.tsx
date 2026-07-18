@@ -1,14 +1,24 @@
+import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
 import { buildWhatsAppUrl } from "@/components/WhatsAppButton";
+import StructuredData from "@/components/seo/StructuredData";
+import { createSeoMetadata } from "@/lib/seo/metadata";
+import { createBreadcrumbSchema } from "@/lib/seo/schema";
 import { getSiteSettings } from "@/lib/supabase/queries/settings";
 import Image from "next/image";
 
 import CTAButton from "@/components/CTAButton";
 import ContactForm from "./contact-form";
 
-export const metadata = {
-  title: "Contact",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return createSeoMetadata({
+    title: "Contact TamysweetUK",
+    description: `Contact TamysweetUK to ask about available kittens, future litters, viewings, or finding the right kitten for your family in the UK.`,
+    path: "/contact",
+    image: "/hero/hero-about.png",
+    keywords: ["contact TamysweetUK", "kitten enquiries UK", "available kittens contact"],
+  });
+}
 
 export default async function ContactPage() {
   const settings = await getSiteSettings();
@@ -41,12 +51,18 @@ export default async function ContactPage() {
 
   return (
     <div className="bg-[#FCF9F6] pb-16">
+      <StructuredData
+        data={createBreadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Contact", path: "/contact" },
+        ])}
+      />
       <PageHero
         eyebrow="HOME / CONTACT"
         title="Get in Touch"
         description="Have a question or ready to welcome a kitten into your home? We'd love to hear from you."
         imageSrc="/hero/hero-about.png"
-        imageAlt="TamysweetUK contact page hero"
+        imageAlt="TamysweetUK contact and kitten enquiry page"
         className="page-hero-kittens"
         imageClassName="object-cover object-center md:object-[75%_center] lg:object-[72%_center]"
       />
@@ -98,10 +114,15 @@ export default async function ContactPage() {
                     href={item.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-11 items-center gap-2 rounded-full border border-[#F3D6DE] bg-white px-[18px] text-sm font-semibold text-[#EF6F91] transition duration-200 hover:-translate-y-[2px] hover:bg-[#EF6F91] hover:text-white"
+                    className="group inline-flex h-11 items-center gap-2 rounded-full border border-[#F3D6DE] bg-white px-[18px] text-sm font-semibold text-[#EF6F91] transition duration-200 hover:-translate-y-[2px] hover:bg-[#EF6F91] hover:text-white"
                   >
-                    <SocialIcon kind={item.icon} className="h-[18px] w-[18px]" />
-                    {item.label}
+                    <SocialIcon
+                      kind={item.icon}
+                      className="h-[18px] w-[18px] transition-colors duration-200 group-hover:text-white"
+                    />
+                    <span className="transition-colors duration-200 group-hover:text-white">
+                      {item.label}
+                    </span>
                   </a>
                 ))}
               </div>

@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import type { Kitten } from "@/lib/mock-kittens";
+import { buildKittenImageAltText } from "@/lib/mappers/kitten";
+import type { KittenCard as Kitten } from "@/lib/mock-kittens";
 
 type KittenCardProps = {
   kitten: Kitten;
+  prioritizeImage?: boolean;
 };
 
 const availabilityStyles: Record<Kitten["availability"], string> = {
@@ -13,14 +15,21 @@ const availabilityStyles: Record<Kitten["availability"], string> = {
   Sold: "bg-[#EFEDEE] text-[#7B7474]",
 };
 
-export default function KittenCard({ kitten }: KittenCardProps) {
+export default function KittenCard({ kitten, prioritizeImage = false }: KittenCardProps) {
   return (
     <article className="group mx-auto w-full max-w-[285px] overflow-hidden rounded-[26px] bg-white shadow-[0_14px_40px_rgba(0,0,0,0.06)] transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_22px_48px_rgba(0,0,0,0.1)]">
       <div className="relative h-[240px] overflow-hidden rounded-t-[26px] bg-[#F8F3EE]">
         <Image
           src={kitten.images[0]}
-          alt={kitten.name}
+          alt={buildKittenImageAltText({
+            name: kitten.name,
+            breed: kitten.breed,
+            colour: kitten.colour,
+            index: 0,
+          })}
           fill
+          priority={prioritizeImage}
+          loading={prioritizeImage ? "eager" : "lazy"}
           className="object-cover object-center transition duration-500 group-hover:scale-[1.03]"
           sizes="(min-width: 1280px) 285px, (min-width: 768px) 44vw, 100vw"
         />

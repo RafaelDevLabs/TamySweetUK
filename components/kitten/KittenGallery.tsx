@@ -8,11 +8,17 @@ import KittenGalleryLightbox from "@/components/kitten/KittenGalleryLightbox";
 
 type KittenGalleryProps = {
   images: string[];
+  imageAlts: string[];
   name: string;
   availability: "Available" | "Reserved" | "Sold";
 };
 
-export default function KittenGallery({ images, name, availability }: KittenGalleryProps) {
+export default function KittenGallery({
+  images,
+  imageAlts,
+  name,
+  availability,
+}: KittenGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const mainImageButtonRef = useRef<HTMLButtonElement>(null);
@@ -64,7 +70,7 @@ export default function KittenGallery({ images, name, availability }: KittenGall
           >
             <Image
               src={selectedImage}
-              alt={name}
+              alt={imageAlts[safeIndex] ?? `${name} kitten`}
               fill
               quality={85}
               priority={safeIndex === 0}
@@ -134,7 +140,7 @@ export default function KittenGallery({ images, name, availability }: KittenGall
             >
               <Image
                 src={image}
-                alt={`${name} photo ${index + 1}`}
+                alt={imageAlts[index] ?? `${name} photo ${index + 1}`}
                 fill
                 quality={75}
                 className="object-cover"
@@ -148,6 +154,7 @@ export default function KittenGallery({ images, name, availability }: KittenGall
       {isLightboxOpen ? (
         <KittenGalleryLightbox
           images={images}
+          imageAlts={imageAlts}
           name={name}
           selectedIndex={safeIndex}
           onClose={() => setIsLightboxOpen(false)}

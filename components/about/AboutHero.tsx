@@ -31,6 +31,8 @@ export default function AboutHero() {
               alt="TamysweetUK about page hero"
               fill
               priority
+              fetchPriority="high"
+              quality={85}
               className="object-cover object-[36%_32%] transition duration-300 ease-out group-hover:scale-[1.015]"
               sizes="(max-width: 767px) 100vw, (max-width: 1023px) 54vw, 56vw"
             />

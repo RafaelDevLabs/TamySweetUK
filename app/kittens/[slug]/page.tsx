@@ -1,14 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
 import KittenDetailContent from "@/components/kitten/KittenDetailContent";
 import KittenGallery from "@/components/kitten/KittenGallery";
+import StructuredData from "@/components/seo/StructuredData";
+import {
+  getLegacyKittenSlugRedirect,
+  getLegacyKittenSlugsForCanonicalSlug,
+} from "@/lib/kittens/legacy-slugs";
 import {
   availabilityMap,
+  buildKittenImageAltText,
   genderMap,
   resolveKittenImageUrls,
 } from "@/lib/mappers/kitten";
+import { createSeoMetadata } from "@/lib/seo/metadata";
+import {
+  createBreadcrumbSchema,
+  createKittenImageAlts,
+  createKittenProductSchema,
+} from "@/lib/seo/schema";
 import { getSiteSettings } from "@/lib/supabase/queries/settings";
 import { getKittenBySlug } from "@/lib/supabase/queries/kittens";
 
@@ -16,39 +28,74 @@ type KittenDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+async function getKittenPageData(slug: string) {
+  const canonicalSlug = getLegacyKittenSlugRedirect(slug) ?? slug;
+  const directKitten = await getKittenBySlug(canonicalSlug);
+
+  if (directKitten) {
+    return directKitten;
+  }
+
+  for (const legacySlug of getLegacyKittenSlugsForCanonicalSlug(canonicalSlug)) {
+    const legacyKitten = await getKittenBySlug(legacySlug);
+
+    if (legacyKitten) {
+      return {
+        ...legacyKitten,
+        slug: canonicalSlug,
+      };
+    }
+  }
+
+  return null;
+}
+
 export async function generateMetadata({ params }: KittenDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
 
   try {
-    const kitten = await getKittenBySlug(slug);
+    const kitten = await getKittenPageData(slug);
 
     if (!kitten) {
-      return {
-        title: "Kitten | TamysweetUK",
+      return createSeoMetadata({
+        title: "Kitten",
         description: "Meet our kittens at TamysweetUK.",
-      };
+        path: `/kittens/${slug}`,
+      });
     }
 
-    return {
-      title: `${kitten.name} | ${kitten.breed} Kitten | TamysweetUK`,
+    const images = resolveKittenImageUrls(kitten);
+
+    return createSeoMetadata({
+      title: `${kitten.name} ${kitten.breed} kitten`,
       description: kitten.short_description,
-    };
+      path: `/kittens/${kitten.slug}`,
+      image: images[0],
+      keywords: [kitten.name, kitten.breed, `${kitten.colour} kitten`, "TamysweetUK kitten"],
+    });
   } catch (error) {
     console.error(`Failed to load kitten metadata for slug "${slug}".`, error);
 
-    return {
-      title: "Kitten | TamysweetUK",
+    return createSeoMetadata({
+      title: "Kitten",
       description: "Meet our kittens at TamysweetUK.",
-    };
+      path: `/kittens/${slug}`,
+    });
   }
 }
 
 export default async function KittenDetailPage({ params }: KittenDetailPageProps) {
   const { slug } = await params;
+  const canonicalSlug = getLegacyKittenSlugRedirect(slug);
+
+  if (canonicalSlug) {
+    permanentRedirect(`/kittens/${canonicalSlug}`);
+  }
+
   let kitten = null;
 
   try {
-    kitten = await getKittenBySlug(slug);
+    kitten = await getKittenPageData(slug);
   } catch (error) {
     console.error(`Failed to load kitten detail page for slug "${slug}".`, error);
   }
@@ -60,6 +107,10 @@ export default async function KittenDetailPage({ params }: KittenDetailPageProps
   const availability = availabilityMap[kitten.availability];
   const gender = genderMap[kitten.gender];
   const images = resolveKittenImageUrls(kitten);
+  const imageAlts =
+    kitten.images.length > 0
+      ? createKittenImageAlts(kitten)
+      : [buildKittenImageAltText({ name: kitten.name, breed: kitten.breed, colour: kitten.colour, index: 0 })];
   const settings = await getSiteSettings();
   const details = [
     { label: "Breed", value: kitten.breed },
@@ -81,6 +132,16 @@ export default async function KittenDetailPage({ params }: KittenDetailPageProps
 
   return (
     <div className="bg-white px-4 pb-[72px] pt-6 sm:px-6 sm:pb-[72px] sm:pt-8">
+      <StructuredData
+        data={[
+          createBreadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Kittens", path: "/kittens" },
+            { name: kitten.name, path: `/kittens/${kitten.slug}` },
+          ]),
+          createKittenProductSchema(kitten),
+        ]}
+      />
       <div className="mx-auto max-w-[980px] space-y-8">
         <nav className="flex flex-wrap items-center gap-2 text-sm">
           <Link href="/" className="text-[var(--pink-deep)] transition duration-200 hover:opacity-80">
@@ -97,7 +158,12 @@ export default async function KittenDetailPage({ params }: KittenDetailPageProps
           <span className="text-[var(--muted)]">{kitten.name}</span>
         </nav>
 
-        <KittenGallery images={images} name={kitten.name} availability={availability} />
+        <KittenGallery
+          images={images}
+          imageAlts={imageAlts}
+          name={kitten.name}
+          availability={availability}
+        />
         <KittenDetailContent
           availability={availability}
           rawAvailability={kitten.availability}

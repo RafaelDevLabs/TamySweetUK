@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+
 import AboutHero from "@/components/about/AboutHero";
 import CTAButton from "@/components/CTAButton";
+import StructuredData from "@/components/seo/StructuredData";
+import { createSeoMetadata } from "@/lib/seo/metadata";
+import { createBreadcrumbSchema } from "@/lib/seo/schema";
 import Image from "next/image";
 
 const trustFeatures = [
@@ -75,13 +81,23 @@ const storyStats = [
   },
 ];
 
-export const metadata = {
+export const metadata: Metadata = createSeoMetadata({
   title: "About TamysweetUK",
-};
+  description:
+    "Learn about TamysweetUK, our family-raised kittens, and the care, health checks, and support behind every kitten we place in a new home.",
+  path: "/about",
+  image: "/design/home-about.png",
+});
 
 export default function AboutPage() {
   return (
     <div className="pb-16">
+      <StructuredData
+        data={createBreadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "About", path: "/about" },
+        ])}
+      />
       <AboutHero />
 
       <div className="section-wrap">
@@ -94,9 +110,9 @@ export default function AboutPage() {
                   className="relative flex flex-col items-center justify-center px-6 py-7 text-center sm:px-8"
                 >
                   <div className="text-[#7A7F5C]">{item.icon}</div>
-                  <h2 className="mt-[14px] text-[15px] font-bold text-[#2F2A2A]">
+                  <h3 className="mt-[14px] text-[15px] font-bold text-[#2F2A2A]">
                     {item.title}
-                  </h2>
+                  </h3>
                   <p className="mt-2 max-w-[200px] text-[13px] leading-[1.5] text-[#5F5A5A]">
                     {item.description}
                   </p>
@@ -225,6 +241,23 @@ export default function AboutPage() {
                 <p className="mt-3 w-full max-w-none text-[14px] leading-[1.65] text-[#5F5A5A] sm:text-[14px]">
                   If you have any questions, feel free to get in touch - I&apos;d love to hear
                   from you!
+                </p>
+                <p className="mt-3 text-[14px] leading-[1.65] text-[#5F5A5A]">
+                  You can also explore our{" "}
+                  <Link
+                    href="/kittens"
+                    className="text-[var(--pink-deep)] underline decoration-[#EF6F91]/40 underline-offset-4"
+                  >
+                    available kittens
+                  </Link>{" "}
+                  or read about the{" "}
+                  <Link
+                    href="/breeds"
+                    className="text-[var(--pink-deep)] underline decoration-[#EF6F91]/40 underline-offset-4"
+                  >
+                    British Shorthair breed
+                  </Link>
+                  .
                 </p>
               </div>
             </div>
